@@ -7,4 +7,5 @@ func _ready():
 			var portal_particles = preload("res://particle systems/Portal.tscn").instance()
 			portal_particles.transform = Transform().translated(pos)
 			add_child(portal_particles)
+	
 

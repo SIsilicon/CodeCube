@@ -8,9 +8,14 @@
 
 config_version=4
 
-_global_script_classes=[  ]
+_global_script_classes=[ {
+"base": "Panel",
+"class": "ProgramBlock",
+"language": "GDScript",
+"path": "res://program blocks/ProgramBlock.gd"
+} ]
 _global_script_class_icons={
-
+"ProgramBlock": ""
 }
 
 [application]

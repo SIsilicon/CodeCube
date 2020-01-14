@@ -24,8 +24,8 @@ export var code := [
 
 func execute() -> void:
 	var line_num := 0
-	while line_num < code.size():
-		
+	
+	while true:
 		var expression : String = code[line_num]
 		match expression:
 			"move":
@@ -36,6 +36,8 @@ func execute() -> void:
 				turn(false)
 			"jump":
 				jump()
+			"stop":
+				return
 		
 		yield(self, "finished_moving")
 		line_num += 1
@@ -60,10 +62,6 @@ func _process(delta : float) -> void:
 				turn(true)
 			elif Input.is_action_pressed("ui_right"):
 				turn(false)
-		else:
-			if Input.is_action_just_pressed("ui_accept") and not executing:
-				executing = true
-				execute()
 	
 	translation = Vector3(pos.x, 0.0, pos.y)
 
