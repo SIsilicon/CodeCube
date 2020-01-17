@@ -1,19 +1,20 @@
 tool
 extends Control
 
-var links := {}
 var dragging_link := false
 var begin_vec := Vector2()
 var end_vec := Vector2()
+
+var cut_line := []
 
 func _draw() -> void:
 	var rect := Rect2()
 	
 	var points := []
 	
-	for link in links:
-		var socket_a = get_parent().sockets[links[link][0]]
-		var socket_b = get_parent().sockets[links[link][1]]
+	for link in get_parent().links:
+		var socket_a = get_parent().get_socket(link, false)
+		var socket_b = get_parent().get_socket(link, true)
 		
 		var point_a : Vector2 = socket_a.get_position()
 		var point_b : Vector2 = socket_b.get_position()
@@ -32,14 +33,19 @@ func _draw() -> void:
 	rect_size = rect.size
 	rect_position = rect.position
 	
+	draw_set_transform(-rect_position, 0, Vector2(1, 1))
 	for i in range(0, points.size(), 2):
-		var begin = points[i] - rect_position
-		var end = points[i+1] - rect_position
+		var begin = points[i]
+		var end = points[i+1]
 		
 		if i == points.size() - 2 and dragging_link:
 			draw_line(begin, end, Color.burlywood, 1.5, true)
 		else:
 			draw_line(begin, end, Color.white, 1.5, true)
+	
+	draw_set_transform_matrix(get_global_transform().affine_inverse())
+	if cut_line.size() > 1:
+		draw_polyline(cut_line, Color.red, 1.2, true)
 
 func _process(delta : float) -> void:
 	update()
