@@ -404,6 +404,16 @@ __meta__ = {
 }
 
 [node name="Tween" type="Tween" parent="."]
+
+[node name="Label" type="Label" parent="."]
+margin_right = 40.0
+margin_bottom = 28.0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+text = "Manual Control: Enabled"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 [connection signal="pressed" from="Controls/Play" to="." method="_on_Play_pressed"]
 [connection signal="pressed" from="Controls/Pause" to="." method="_on_Pause_pressed"]
 [connection signal="pressed" from="Controls/Reset" to="." method="_on_Reset_pressed"]

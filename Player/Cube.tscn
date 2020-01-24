@@ -14,7 +14,7 @@
 [ext_resource path="res://Player/cube/primary-col.material" type="Material" id=12]
 [ext_resource path="res://Player/cube/secondary-col.material" type="Material" id=13]
 
-[sub_resource type="SpatialMaterial" id=5]
+[sub_resource type="SpatialMaterial" id=1]
 flags_transparent = true
 params_diffuse_mode = 1
 params_specular_mode = 4
@@ -28,8 +28,7 @@ emission_energy = 2.0
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="ArrayMesh" id=1]
-resource_name = "Cube"
+[sub_resource type="ArrayMesh" id=2]
 surfaces/0 = {
 "aabb": AABB( -0.5, -0.5, -0.5, 1, 1, 1 ),
 "array_data": PoolByteArray( 102, 102, 230, 190, 0, 0, 0, 191, 102, 102, 230, 62, 0, 129, 0, 0, 129, 0, 0, 127, 84, 57, 255, 59, 102, 102, 230, 62, 0, 0, 0, 191, 102, 102, 230, 190, 0, 129, 0, 0, 129, 0, 0, 127, 86, 53, 85, 57, 102, 102, 230, 190, 0, 0, 0, 191, 102, 102, 230, 190, 0, 129, 0, 0, 129, 0, 0, 127, 84, 57, 85, 57, 102, 102, 230, 190, 0, 0, 0, 191, 102, 102, 230, 62, 0, 129, 0, 0, 129, 0, 0, 127, 84, 57, 255, 59, 102, 102, 230, 62, 0, 0, 0, 191, 102, 102, 230, 62, 0, 129, 0, 0, 129, 0, 0, 127, 86, 53, 255, 59, 102, 102, 230, 62, 0, 0, 0, 191, 102, 102, 230, 190, 0, 129, 0, 0, 129, 0, 0, 127, 86, 53, 85, 57, 0, 0, 0, 191, 102, 102, 230, 62, 102, 102, 230, 190, 129, 0, 0, 0, 0, 0, 127, 127, 86, 53, 86, 53, 0, 0, 0, 191, 102, 102, 230, 190, 102, 102, 230, 62, 129, 0, 0, 0, 0, 0, 127, 127, 84, 57, 84, 57, 0, 0, 0, 191, 102, 102, 230, 190, 102, 102, 230, 190, 129, 0, 0, 0, 0, 0, 127, 127, 86, 53, 84, 57, 0, 0, 0, 191, 102, 102, 230, 62, 102, 102, 230, 190, 129, 0, 0, 0, 0, 0, 127, 127, 86, 53, 86, 53, 0, 0, 0, 191, 102, 102, 230, 62, 102, 102, 230, 62, 129, 0, 0, 0, 0, 0, 127, 127, 84, 57, 86, 53, 0, 0, 0, 191, 102, 102, 230, 190, 102, 102, 230, 62, 129, 0, 0, 0, 0, 0, 127, 127, 84, 57, 84, 57, 102, 102, 230, 190, 102, 102, 230, 62, 0, 0, 0, 63, 0, 0, 127, 0, 129, 0, 0, 127, 84, 53, 84, 57, 102, 102, 230, 62, 102, 102, 230, 190, 0, 0, 0, 63, 0, 0, 127, 0, 129, 0, 0, 127, 139, 10, 86, 53, 102, 102, 230, 190, 102, 102, 230, 190, 0, 0, 0, 63, 0, 0, 127, 0, 129, 0, 0, 127, 84, 53, 86, 53, 102, 102, 230, 190, 102, 102, 230, 62, 0, 0, 0, 63, 0, 0, 127, 0, 129, 0, 0, 127, 84, 53, 84, 57, 102, 102, 230, 62, 102, 102, 230, 62, 0, 0, 0, 63, 0, 0, 127, 0, 129, 0, 0, 127, 140, 10, 84, 57, 102, 102, 230, 62, 102, 102, 230, 190, 0, 0, 0, 63, 0, 0, 127, 0, 129, 0, 0, 127, 139, 10, 86, 53, 102, 102, 230, 62, 0, 0, 0, 63, 102, 102, 230, 62, 0, 127, 0, 0, 0, 0, 127, 127, 84, 53, 140, 10, 102, 102, 230, 190, 0, 0, 0, 63, 102, 102, 230, 190, 0, 127, 0, 0, 0, 0, 127, 127, 139, 10, 84, 53, 102, 102, 230, 62, 0, 0, 0, 63, 102, 102, 230, 190, 0, 127, 0, 0, 0, 0, 127, 127, 139, 10, 140, 10, 102, 102, 230, 62, 0, 0, 0, 63, 102, 102, 230, 62, 0, 127, 0, 0, 0, 0, 127, 127, 84, 53, 140, 10, 102, 102, 230, 190, 0, 0, 0, 63, 102, 102, 230, 62, 0, 127, 0, 0, 0, 0, 127, 127, 84, 53, 84, 53, 102, 102, 230, 190, 0, 0, 0, 63, 102, 102, 230, 190, 0, 127, 0, 0, 0, 0, 127, 127, 139, 10, 84, 53, 0, 0, 0, 63, 102, 102, 230, 62, 102, 102, 230, 62, 127, 0, 0, 0, 0, 0, 127, 127, 84, 53, 255, 59, 0, 0, 0, 63, 102, 102, 230, 190, 102, 102, 230, 190, 127, 0, 0, 0, 0, 0, 127, 127, 139, 10, 85, 57, 0, 0, 0, 63, 102, 102, 230, 190, 102, 102, 230, 62, 127, 0, 0, 0, 0, 0, 127, 127, 84, 53, 85, 57, 0, 0, 0, 63, 102, 102, 230, 62, 102, 102, 230, 62, 127, 0, 0, 0, 0, 0, 127, 127, 84, 53, 255, 59, 0, 0, 0, 63, 102, 102, 230, 62, 102, 102, 230, 190, 127, 0, 0, 0, 0, 0, 127, 127, 140, 10, 255, 59, 0, 0, 0, 63, 102, 102, 230, 190, 102, 102, 230, 190, 127, 0, 0, 0, 0, 0, 127, 127, 139, 10, 85, 57, 102, 102, 230, 62, 102, 102, 230, 62, 0, 0, 0, 191, 0, 0, 129, 0, 129, 0, 0, 127, 85, 57, 85, 57, 102, 102, 230, 190, 102, 102, 230, 190, 0, 0, 0, 191, 0, 0, 129, 0, 129, 0, 0, 127, 255, 59, 255, 59, 102, 102, 230, 62, 102, 102, 230, 190, 0, 0, 0, 191, 0, 0, 129, 0, 129, 0, 0, 127, 85, 57, 255, 59, 102, 102, 230, 62, 102, 102, 230, 62, 0, 0, 0, 191, 0, 0, 129, 0, 129, 0, 0, 127, 85, 57, 85, 57, 102, 102, 230, 190, 102, 102, 230, 62, 0, 0, 0, 191, 0, 0, 129, 0, 129, 0, 0, 127, 255, 59, 85, 57, 102, 102, 230, 190, 102, 102, 230, 190, 0, 0, 0, 191, 0, 0, 129, 0, 129, 0, 0, 127, 255, 59, 255, 59 ),
@@ -55,10 +54,10 @@ surfaces/1 = {
 "vertex_count": 288
 }
 
-[sub_resource type="BoxShape" id=6]
+[sub_resource type="BoxShape" id=3]
 extents = Vector3( 0.488822, 0.518143, 0.506891 )
 
-[sub_resource type="Shader" id=2]
+[sub_resource type="Shader" id=4]
 code = "shader_type spatial;
 render_mode blend_mix, depth_draw_alpha_prepass, unshaded;
 
@@ -96,14 +95,13 @@ void fragment() {
 }
 "
 
-[sub_resource type="ShaderMaterial" id=3]
-shader = SubResource( 2 )
+[sub_resource type="ShaderMaterial" id=5]
+shader = SubResource( 4 )
 shader_param/uv_rotation = 0.0
 shader_param/alpha_scissor_threshold = 0.58
 shader_param/texture_albedo = ExtResource( 11 )
 
-[sub_resource type="Animation" id=4]
-resource_name = "interpreting"
+[sub_resource type="Animation" id=6]
 loop = true
 step = 0.167
 tracks/0/type = "value"
@@ -128,26 +126,26 @@ script = ExtResource( 2 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0 )
 
 [node name="Glow" type="MeshInstance" parent="Cube" index="0"]
-material_override = SubResource( 5 )
-mesh = SubResource( 1 )
+material_override = SubResource( 1 )
+mesh = SubResource( 2 )
 material/0 = null
 material/1 = null
 
 [node name="CollisionShape" type="CollisionShape" parent="." index="2"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.509523, 0 )
-shape = SubResource( 6 )
+shape = SubResource( 3 )
 
 [node name="LoadingIcon" type="Sprite3D" parent="." index="3"]
 transform = Transform( 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1.444, 0 )
 visible = false
-material_override = SubResource( 3 )
+material_override = SubResource( 5 )
 pixel_size = 0.0022
 billboard = 1
 texture = ExtResource( 11 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="LoadingIcon" index="0"]
 playback_speed = 2.0
-anims/interpreting = SubResource( 4 )
+anims/interpreting = SubResource( 6 )
 
 [node name="FloorCast" type="RayCast" parent="." index="4"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )

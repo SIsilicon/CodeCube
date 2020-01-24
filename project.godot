@@ -69,6 +69,10 @@ window/stretch/aspect="expand"
 
 enabled=PoolStringArray( "node_fsm_plugin" )
 
+[gdnative]
+
+singletons=[  ]
+
 [gui]
 
 theme/use_hidpi=true
