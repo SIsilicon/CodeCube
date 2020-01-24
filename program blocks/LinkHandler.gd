@@ -159,12 +159,15 @@ func add_link(socket_a_id : int, socket_b_id : int, link_key_override := -1) -> 
 		var in_block : Control = socket_b.get_parent()
 		var out_block : Control = socket_a.get_parent()
 		
-		in_block.link_keys.append(link_key)
-		out_block.link_keys.append(link_key)
-		
 		if link_key_override != -1:
+			in_block.link_keys.append(link_key_override)
+			out_block.link_keys.append(link_key_override)
+			
 			links[link_key_override] = [socket_a.id, socket_b.id]
 		else:
+			in_block.link_keys.append(link_key)
+			out_block.link_keys.append(link_key)
+			
 			links[link_key] = [socket_a.id, socket_b.id]
 			link_key += 1
 

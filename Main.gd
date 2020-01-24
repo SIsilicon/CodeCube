@@ -1,9 +1,14 @@
 extends Spatial
 
+export(bool) var sandbox_mode := false
+export(bool) var manual_control := false
+
 onready var cube : Spatial
 
 var dragging := false
+var zoom := 1.0
 var drag_offset := Vector2()
+var drag_speed := 2.0
 
 var interpreting := false
 var playing := false
@@ -12,35 +17,48 @@ var show_controls := true
 var cube_died := false
 
 func _ready() -> void:
+	if not sandbox_mode:
+		$MapEditor.queue_free()
 	spawn_cube()
 
 func _unhandled_input(event : InputEvent) -> void:
 	if not ($Controls/Pause.visible and $Controls/Reset.visible):
 		if event is InputEventMouseButton:
-			dragging = event.pressed
+			if event.button_index == BUTTON_MIDDLE:
+				dragging = event.pressed
+			elif event.button_index == BUTTON_WHEEL_UP:
+				zoom /= 1.1
+			elif event.button_index == BUTTON_WHEEL_DOWN:
+				zoom *= 1.1
 		if event is InputEventMouseMotion and dragging:
-			drag_offset += event.relative * 0.01
+			drag_offset += event.relative * 0.01 * drag_speed
 
 func _process(delta : float) -> void:
-	if weakref(cube).get_ref():
-		var new_cam_trans = Transform().translated(Vector3(0, 6, -4))
-		new_cam_trans = new_cam_trans.translated(cube.translation)
-		new_cam_trans = new_cam_trans.looking_at(cube.translation, Vector3.UP)
+	if cube_exists():
+		var new_cam_trans := Transform().translated(Vector3(0, 6, -4) * zoom)
+		var target := cube.translation
+		target.y = max(target.y, -2.0)
+		new_cam_trans = new_cam_trans.translated(target)
+		new_cam_trans = new_cam_trans.looking_at(target, Vector3.UP)
 		
 		if not ($Controls/Pause.visible and $Controls/Reset.visible):
 			new_cam_trans.origin.x += drag_offset.x
 			new_cam_trans.origin.z += drag_offset.y
 		else:
 			drag_offset = Vector2()
+			zoom = 1.0
 		
 		$CameraFollow.transform = new_cam_trans
+	elif manual_control:
+		spawn_cube()
 
 func spawn_cube() -> void:
 	cube = preload("res://Player/Cube.tscn").instance()
 	add_child_below_node($GridMap, cube)
-	cube.grid_map = $GridMap
-	cube.teleport_begin($GridMap/Spawn)
+	cube.manual_control = manual_control
+	cube.teleport($GridMap.spawn_tile)
 	cube.connect("died", self, "_on_Cube_died")
+	cube.manual_control = true
 	cube_died = false
 
 func pause_node(node : Node, paused : bool) -> void:
@@ -73,10 +91,13 @@ func _on_Cube_died() -> void:
 func _on_Play_pressed():
 	if not interpreting and not playing:
 		interpreting = true
-		var error = $ProgramWorkshop.interpret()
+		cube.show_loading_icon()
 		
+		var error = $ProgramWorkshop.interpret()
 		yield(get_tree().create_timer(0.5, true), "timeout")
+		
 		interpreting = false
+		cube.hide_loading_icon()
 		
 		if error:
 			match error:
@@ -93,7 +114,7 @@ func _on_Play_pressed():
 		cube.code = $ProgramWorkshop.code
 		cube.execute()
 	
-	if not cube_died and playing:
+	if cube_exists() and playing:
 		pause_node(cube, false)
 		$Controls/Play.hide()
 		$Controls/Pause.show()
@@ -102,13 +123,13 @@ func _on_Pause_pressed():
 	$Controls/Pause.hide()
 	$Controls/Play.show()
 	
-	if not cube_died:
+	if cube_exists():
 		pause_node(cube, true)
 
 func _on_Reset_pressed():
-	if not cube_died:
+	if cube_exists():
 		cube.executing = false
-		cube.teleport_begin($GridMap/Spawn)
+		cube.teleport($GridMap.spawn_tile)
 	else:
 		spawn_cube()
 	
@@ -128,3 +149,6 @@ func _on_Drawer_pressed():
 	
 	$Tween.start()
 	show_controls = not show_controls
+
+func cube_exists() -> bool:
+	return weakref(cube).get_ref() != null

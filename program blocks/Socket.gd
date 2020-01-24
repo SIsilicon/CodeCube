@@ -6,7 +6,14 @@ export(int, "Inflow", "Outflow") var type := 0
 onready var block := get_parent_control()
 var id := -1
 
+var unselected_color : Color
 var mouse_inside := false
+
+func _ready():
+	var stylebox : StyleBoxFlat = get_stylebox("panel", "").duplicate()
+	if stylebox:
+		unselected_color = stylebox.bg_color
+		add_stylebox_override("panel", stylebox)
 
 func _input(event : InputEvent) -> void:
 	if mouse_inside:
@@ -41,8 +48,10 @@ func _input(event : InputEvent) -> void:
 func _notification(what : int) -> void:
 	if what == NOTIFICATION_MOUSE_ENTER:
 		mouse_inside = true
+		get_stylebox("panel", "").bg_color = Color.white
 	if what == NOTIFICATION_MOUSE_EXIT:
 		mouse_inside = false
+		get_stylebox("panel", "").bg_color = unselected_color
 
 func can_drop_data(position : Vector2, data) -> bool:
 	return typeof(data) == TYPE_ARRAY and data.size() == 2 and \

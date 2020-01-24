@@ -43,6 +43,9 @@ margin_bottom = 100.0
 mouse_filter = 2
 custom_styles/panel = SubResource( 1 )
 script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 anchor_left = 1.0
@@ -55,6 +58,7 @@ margin_bottom = -6.65342
 margin_right = 40.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 40, 40 )
+shortcut_in_tooltip = false
 shortcut = SubResource( 3 )
 texture_normal = ExtResource( 2 )
 texture_pressed = ExtResource( 3 )
@@ -63,10 +67,11 @@ texture_click_mask = ExtResource( 5 )
 expand = true
 
 [node name="Delete" type="TextureButton" parent="HBoxContainer"]
-margin_left = 44.0
-margin_right = 84.0
+margin_left = 48.0
+margin_right = 88.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 40, 40 )
+shortcut_in_tooltip = false
 shortcut = SubResource( 5 )
 texture_normal = ExtResource( 6 )
 texture_pressed = ExtResource( 7 )

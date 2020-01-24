@@ -4,34 +4,38 @@
 flags_transparent = true
 flags_unshaded = true
 vertex_color_use_as_albedo = true
+params_blend_mode = 1
 params_cull_mode = 2
-params_billboard_mode = 3
+params_billboard_mode = 2
 params_billboard_keep_scale = true
-particles_anim_h_frames = 1
-particles_anim_v_frames = 1
-particles_anim_loop = false
-albedo_color = Color( 0.643137, 1, 0.501961, 1 )
+albedo_color = Color( 0.623529, 1, 0.54902, 1 )
 proximity_fade_enable = true
 proximity_fade_distance = 1.0
 
 [sub_resource type="QuadMesh" id=2]
 material = SubResource( 1 )
-size = Vector2( 0.1, 0.1 )
+size = Vector2( -0.01, 0.31 )
 
-[sub_resource type="Curve" id=3]
-_data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 0.654468, 1 ), 0.0, 0.0, 0, 0, Vector2( 1, 0 ), 0.0, 0.0, 0, 0 ]
+[sub_resource type="Gradient" id=3]
+offsets = PoolRealArray( 0, 0.529412, 1 )
+colors = PoolColorArray( 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0 )
 
 [node name="Portal" type="Spatial"]
 
 [node name="CPUParticles" type="CPUParticles" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-008, 1, 0, -1, -4.37114e-008, 0, 0, 0 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
+amount = 32
+lifetime = 2.0
 mesh = SubResource( 2 )
 emission_shape = 2
 emission_box_extents = Vector3( 0.4, 0.4, 0 )
+flag_align_y = true
+direction = Vector3( 0, 0, 1 )
 spread = 0.0
 gravity = Vector3( 0, 0, 0 )
 initial_velocity = 0.7
 initial_velocity_random = 0.77
 angular_velocity = 0.4789
 scale_amount = 2.0
-scale_amount_curve = SubResource( 3 )
+scale_amount_random = 0.35
+color_ramp = SubResource( 3 )

@@ -1,8 +1,8 @@
 extends ScrollContainer
 
 export var button_theme : Theme
-export var button_group : ButtonGroup
 
+var button_group : ButtonGroup
 var blocks := {}
 
 func _ready():

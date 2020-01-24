@@ -29,7 +29,7 @@ func _gui_input(event : InputEvent) -> void:
 	elif event is InputEventMouseMotion and pressed:
 		rect_position += event.position - pre_drag_position
 		dragged = true
-		if event.shift:
+		if not event.shift:
 			emit_signal("dragged", event.position - pre_drag_position)
 		accept_event()
 

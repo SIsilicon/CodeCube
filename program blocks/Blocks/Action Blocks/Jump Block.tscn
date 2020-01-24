@@ -21,6 +21,9 @@ margin_bottom = 54.66
 rect_min_size = Vector2( 120, 20 )
 custom_styles/panel = SubResource( 1 )
 script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Label" type="Label" parent="."]
 anchor_left = 0.5
@@ -33,6 +36,7 @@ margin_right = 40.0
 margin_bottom = 7.0
 text = "Jump"
 align = 1
+valign = 1
 
 [node name="Inflow" parent="." instance=ExtResource( 2 )]
 anchor_top = 0.0

@@ -20,14 +20,22 @@ rect_min_size = Vector2( 150, 50 )
 focus_mode = 1
 custom_styles/panel = SubResource( 1 )
 script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Label" type="Label" parent="."]
-margin_left = 3.0
-margin_top = 18.0
-margin_right = 152.0
-margin_bottom = 32.0
-text = "Start Block"
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -74.5
+margin_top = -7.0
+margin_right = 74.5
+margin_bottom = 7.0
+text = "Start"
 align = 1
+valign = 1
 
 [node name="Outflow" parent="." instance=ExtResource( 2 )]
 anchor_left = 0.0

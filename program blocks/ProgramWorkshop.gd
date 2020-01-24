@@ -36,10 +36,11 @@ func _gui_input(event : InputEvent) -> void:
 		accept_event()
 
 func _process(delta : float) -> void:
-	if Input.is_action_just_released("undo"):
-		Global.undo_redo.undo()
-	elif Input.is_action_just_released("redo"):
-		Global.undo_redo.redo()
+	if expanded:
+		if Input.is_action_just_released("undo"):
+			Global.undo_redo.undo()
+		elif Input.is_action_just_released("redo"):
+			Global.undo_redo.redo()
 	
 	var new_scale : Vector2 = $LinkHandler.rect_scale.linear_interpolate(Vector2(1, 1) * zoom, delta * 10.0)
 	var zoom_ratio = new_scale / $LinkHandler.rect_scale
@@ -51,7 +52,12 @@ func can_drop_data(position : Vector2, data) -> bool:
 
 func drop_data(position : Vector2, data) -> void:
 	var block = data.duplicate()
-	$LinkHandler.add_block(block)
+	
+	var undo_redo = Global.undo_redo
+	undo_redo.create_action("Add Block(s)")
+	undo_redo.add_do_method($LinkHandler, "add_block", block)
+	undo_redo.add_undo_method($LinkHandler, "remove_child", block)
+	undo_redo.commit_action()
 	block.rect_position = $LinkHandler.get_transform().affine_inverse().xform(position)
 
 func interpret() -> int:
@@ -76,6 +82,5 @@ func _on_Drawer_pressed():
 		$Tween.interpolate_property(self, "rect_position", rect_position, Vector2(-rect_size.x, 0), 0.5, Tween.TRANS_QUAD, Tween.EASE_OUT)
 	else:
 		$Tween.interpolate_property(self, "rect_position", rect_position, Vector2(), 0.5, Tween.TRANS_QUAD, Tween.EASE_OUT)
-	
 	$Tween.start()
 	expanded = not expanded

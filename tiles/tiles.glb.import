@@ -11,8 +11,8 @@ dest_files=[ "res://.import/tiles.glb-758837214e8b5c959fe34ffb483f8621.scn" ]
 
 [params]
 
-nodes/root_type="Spatial"
-nodes/root_name="Scene Root"
+nodes/root_type="StaticBody"
+nodes/root_name="Tile"
 nodes/root_scale=1.0
 nodes/custom_script=""
 nodes/storage=0

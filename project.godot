@@ -14,14 +14,32 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://program blocks/Blocks/Action Blocks/Action Block.gd"
 }, {
+"base": "Node",
+"class": "FSM",
+"language": "GDScript",
+"path": "res://addons/node_fsm_plugin/fsm_node.gd"
+}, {
 "base": "Panel",
 "class": "ProgramBlock",
 "language": "GDScript",
 "path": "res://program blocks/ProgramBlock.gd"
+}, {
+"base": "Node",
+"class": "State",
+"language": "GDScript",
+"path": "res://addons/node_fsm_plugin/state_node.gd"
+}, {
+"base": "StaticBody",
+"class": "Tile",
+"language": "GDScript",
+"path": "res://tiles/Tile.gd"
 } ]
 _global_script_class_icons={
 "ActionBlock": "",
-"ProgramBlock": ""
+"FSM": "res://addons/node_fsm_plugin/fsm_icon.svg",
+"ProgramBlock": "",
+"State": "res://addons/node_fsm_plugin/state_icon.svg",
+"Tile": ""
 }
 
 [application]
@@ -33,6 +51,28 @@ config/icon="res://icon.png"
 [autoload]
 
 Global="*res://Global.gd"
+
+[debug]
+
+settings/fps/force_fps=30
+
+[display]
+
+window/size/resizable=false
+window/size/test_width=1024
+window/size/test_height=600
+window/dpi/allow_hidpi=true
+window/stretch/mode="2d"
+window/stretch/aspect="expand"
+
+[editor_plugins]
+
+enabled=PoolStringArray( "node_fsm_plugin" )
+
+[gui]
+
+theme/use_hidpi=true
+theme/custom_font="res://fonts/Noto Sans UI/NotoSansUI.tres"
 
 [importer_defaults]
 
@@ -54,7 +94,7 @@ texture={
 "process/premult_alpha": false,
 "size_limit": 0,
 "stream": false,
-"svg/scale": 1.333
+"svg/scale": 1.0
 }
 
 [input]
@@ -85,10 +125,21 @@ redo={
  ]
 }
 
+[layer_names]
+
+3d_physics/layer_1="Floor"
+3d_physics/layer_2="Death"
+3d_physics/layer_3="Floor"
+3d_physics/layer_11="Player"
+
 [rendering]
 
 quality/driver/fallback_to_gles2=true
 vram_compression/import_etc=true
 vram_compression/import_etc2=false
+quality/shadow_atlas/size=1024
+quality/shadow_atlas/quadrant_0_subdiv=2
+limits/rendering/max_renderable_lights=1024
+limits/rendering/max_renderable_reflections=256
 quality/filters/msaa=2
 environment/default_environment="res://default_env.tres"

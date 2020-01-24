@@ -3,37 +3,30 @@ extends Spatial
 signal finished_moving
 signal died
 
-var pos := Vector2(0, 4)
-export var speed_factor := 1.0
 export var manual_control := false
-
-var grid_map : GridMap
 
 var moving := false setget set_moving
 var executing := false
 
+var linear_velocity := Vector3()
+var tile : Tile
+
 onready var anim_player := $AnimationPlayer
+onready var tween := $Tween
 
 export var code := [
 	"move",
 	"move",
 	"turn left",
-	"move",
 	"jump",
 	"move"
 ]
 
-func teleport_begin(position) -> void:
-	if typeof(position) == TYPE_TRANSFORM:
-		transform = position
-	elif position is Spatial:
-		transform = position.transform
-	pos = Vector2(transform.origin.x, transform.origin.z)
-	
-	play_anim("Cube-turn")
-	$Tween.stop_all()
-	$Tween.interpolate_property(self, "scale", Vector3(), Vector3(1,1,1), 0.2, Tween.TRANS_BACK, Tween.EASE_OUT)
-	$Tween.start()
+var turn_direction : int
+
+func teleport(position) -> void:
+	tile = position
+	$FSM.go_to("teleport_end")
 
 func execute() -> void:
 	executing = true
@@ -43,13 +36,15 @@ func execute() -> void:
 		var expression : String = code[line_num]
 		match expression:
 			"move":
-				move()
+				$FSM.go_to("rolling")
 			"turn left":
-				turn(true)
+				turn_direction = 1
+				$FSM.go_to("turning")
 			"turn right":
-				turn(false)
+				turn_direction = -1
+				$FSM.go_to("turning")
 			"jump":
-				jump()
+				$FSM.go_to("jumping")
 			"stop":
 				break
 		
@@ -58,82 +53,55 @@ func execute() -> void:
 	
 	executing = false
 
-func _ready():
+func _ready() -> void:
+	$Cube/Glow.material_override = $Cube/Glow.material_override.duplicate()
 	translation = translation.round()
 	rotation.y = stepify(rotation.y, PI/2)
-	pos = Vector2(translation.x, translation.z)
-
-func _process(delta : float) -> void:
-	if not moving:
-		if manual_control:
-			if Input.is_action_pressed("ui_up"):
-				move()
-			elif Input.is_action_just_pressed("jump"):
-				jump()
-			elif Input.is_action_pressed("ui_left"):
-				turn(true)
-			elif Input.is_action_pressed("ui_right"):
-				turn(false)
-	
-	translation = Vector3(pos.x, 0.0, pos.y)
 
 func _physics_process(delta : float) -> void:
 	$CollisionShape.transform = $Cube.transform
+	
+	if tile != null:
+		if not weakref(tile).get_ref():
+			tile = null
+	
+	if not moving:
+		if manual_control:
+			if Input.is_action_pressed("ui_up"):
+				$FSM.go_to("rolling")
+			elif Input.is_action_just_pressed("jump"):
+				$FSM.go_to("jumping")
+			elif Input.is_action_pressed("ui_left"):
+				turn_direction = 1
+				$FSM.go_to("turning")
+			elif Input.is_action_pressed("ui_right"):
+				turn_direction = -1
+				$FSM.go_to("turning")
+	
+	translation += linear_velocity * delta
+	if translation.y < -25.0:
+		die()
 
-func prep_move() -> void:
-	anim_player.playback_speed = speed_factor
-	$Tween.stop_all()
-	pos = pos.round()
-	rotation.y = stepify(rotation.y, PI/2)
-	self.moving = true
+func show_loading_icon() -> void:
+	$LoadingIcon.show()
+	$LoadingIcon/AnimationPlayer.play("interpreting")
 
-func move() -> void:
-	prep_move()
-	
-	if check_wall(get_dir()):
-		play_anim("Cube-interrupt-roll")
-	else:
-		play_anim("Cube-roll")
-		$Tween.interpolate_callback(self, 0.4 / speed_factor, "check_tile")
-		$Tween.interpolate_property(self, "pos", pos, pos + get_dir(),
-				0.4 / speed_factor, Tween.TRANS_LINEAR, Tween.EASE_IN)
-	
-	$Tween.start()
-
-func jump() -> void:
-	prep_move()
-	
-	play_anim("Cube-jump-roll")
-	$Tween.interpolate_callback(self, 0.5 / speed_factor, "check_tile")
-	$Tween.interpolate_property(self, "pos", pos, pos + get_dir() * 2.0,
-			0.55 / speed_factor, Tween.TRANS_LINEAR, Tween.EASE_IN)
-	$Tween.start()
-
-func turn(left : bool) -> void:
-	prep_move()
-	
-	var new_rotation := rotation
-	new_rotation.y += (2.0 * float(left) - 1.0) * PI/2
-	
-	play_anim("Cube-turn")
-	$Tween.interpolate_callback(self, 0.34 / speed_factor, "check_tile")
-	$Tween.interpolate_property(self, "rotation", rotation, new_rotation,
-			0.34 / speed_factor, Tween.TRANS_LINEAR, Tween.EASE_IN)
-	$Tween.start()
+func hide_loading_icon() -> void:
+	$LoadingIcon.hide()
+	$LoadingIcon/AnimationPlayer.stop()
 
 func die() -> void:
 	var explosion : Spatial = preload("res://particle systems/Explode.tscn").instance()
 	explosion.translation = $Cube.global_transform.origin
 	get_parent().add_child(explosion)
 	emit_signal("died")
-	queue_free()
-
-func teleport_end() -> void:
-	anim_player.playback_speed = 1.0
-	play_anim("Cube-teleport")
-	moving = true
 	
-	$Tween.interpolate_callback(self, 0.5, "queue_free")
+	hide()
+	set_physics_process(false)
+	$FSM.set_physics_process(false)
+	
+	$Tween.interpolate_property($ColorRect, "color", Color(1, 0, 0, 0.6), Color.transparent, 0.7, Tween.TRANS_LINEAR, Tween.EASE_OUT)
+	$Tween.interpolate_callback(self, 0.7, "queue_free")
 	$Tween.start()
 
 func play_anim(anim : String) -> void:
@@ -145,28 +113,49 @@ func play_anim(anim : String) -> void:
 func floor_position() -> Vector3:
 	return translation * Vector3(1, 0, 1)
 
-func get_tile(position : Vector3) -> int:
-	var grid_pos := grid_map.world_to_map(position.round())
-	return grid_map.get_cell_item(grid_pos.x, 0, grid_pos.z)
+func get_tile(position : Vector3) -> Tile:
+	if $FSM.active_state in ["jumping", "falling"]:
+		$FloorCast.translation = Vector3(0, 0.4, 0)
+	else:
+		$FloorCast.translation = Vector3(0, 0.1, 0)
+	$FloorCast.force_raycast_update()
+	
+	var collider : Tile = $FloorCast.get_collider()
+	tile = collider
+	if collider is preload("res://tiles/Tile.gd"):
+		return collider
+	
+	return null
 
-func check_wall(dir : Vector2) -> bool:
-	var grid_pos := grid_map.world_to_map(floor_position().round() + Vector3(dir.x, 0.0, dir.y))
-	return grid_map.get_cell_item(grid_pos.x, 1, grid_pos.z) != -1
+func check_wall(dir : float) -> bool:
+	$WallCast.cast_to = Vector3(0,0,-1.2).rotated(Vector3.UP, dir)
+	$WallCast.force_raycast_update()
+	
+	var collider : Object = $WallCast.get_collider()
+	tile = collider
+	if collider is preload("res://tiles/Tile.gd"):
+		return collider.is_wall
+	
+	return false
 
 func check_tile() -> void:
 	var tile := get_tile(floor_position())
 	
-	if check_wall(Vector2()):
+	if tile == null:
+		if $FSM.active_state != "jumping":
+			$FSM.go_to("falling")
+		return
+	elif tile.is_wall:
 		die()
 		return
 	
-	match tile:
-		-1: die() # no tile, no life
-		6: die() # spikes
-		5: teleport_end() # goal
+	match tile.type:
+		1: die() # spikes
+		2: $FSM.go_to("teleport_begin") # goal
+		_: $FSM.go_to("idle")
 
-func get_dir() -> Vector2:
-	return Vector2(0, -1).rotated(-rotation.y).round()
+func get_dir() -> Vector3:
+	return -transform.basis.z
 
 func set_moving(value : bool) -> void:
 	if moving != value and value == false and anim_player.current_animation != "Cube-teleport":

@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=2]
 
-[sub_resource type="GDScript" id=5]
+[sub_resource type="GDScript" id=1]
 script/source = "extends Spatial
 
 func _ready():
@@ -8,7 +8,7 @@ func _ready():
 	$AnimationPlayer.play(\"explode\")
 "
 
-[sub_resource type="SpatialMaterial" id=7]
+[sub_resource type="SpatialMaterial" id=2]
 flags_transparent = true
 flags_unshaded = true
 params_blend_mode = 1
@@ -17,12 +17,12 @@ albedo_color = Color( 1, 0.886275, 0.709804, 0.648522 )
 proximity_fade_enable = true
 proximity_fade_distance = 0.3
 
-[sub_resource type="SphereMesh" id=8]
-material = SubResource( 7 )
+[sub_resource type="SphereMesh" id=3]
+material = SubResource( 2 )
 radial_segments = 25
 rings = 24
 
-[sub_resource type="SpatialMaterial" id=1]
+[sub_resource type="SpatialMaterial" id=4]
 flags_transparent = true
 flags_vertex_lighting = true
 vertex_color_use_as_albedo = true
@@ -34,19 +34,20 @@ emission_energy = 1.4
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="QuadMesh" id=2]
-material = SubResource( 1 )
+[sub_resource type="QuadMesh" id=5]
+material = SubResource( 4 )
 size = Vector2( 0.2, 0.2 )
 
 [sub_resource type="Curve" id=6]
 _data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 1, 0 ), 0.0, 0.0, 0, 0 ]
 
-[sub_resource type="Gradient" id=4]
-offsets = PoolRealArray( 0, 0.0463576, 0.496689, 1 )
-colors = PoolColorArray( 0, 0, 0, 0, 1, 1, 1, 0.76, 1, 1, 1, 1, 1, 1, 1, 0 )
+[sub_resource type="Gradient" id=7]
+offsets = PoolRealArray( 0, 0.375566, 1 )
+colors = PoolColorArray( 1, 1, 1, 0.76, 1, 1, 1, 1, 1, 1, 1, 0 )
 
-[sub_resource type="Animation" id=9]
+[sub_resource type="Animation" id=8]
 resource_name = "explode"
+length = 1.5
 tracks/0/type = "value"
 tracks/0/path = NodePath("Sphere:scale")
 tracks/0/interp = 2
@@ -78,7 +79,7 @@ tracks/2/loop_wrap = true
 tracks/2/imported = false
 tracks/2/enabled = true
 tracks/2/keys = {
-"times": PoolRealArray( 1 ),
+"times": PoolRealArray( 1.5 ),
 "transitions": PoolRealArray( 1 ),
 "values": [ {
 "args": [  ],
@@ -87,11 +88,11 @@ tracks/2/keys = {
 }
 
 [node name="Explode" type="Spatial"]
-script = SubResource( 5 )
+script = SubResource( 1 )
 
 [node name="Sphere" type="MeshInstance" parent="."]
 transform = Transform( 0.203262, 0, 0, 0, 0.203262, 0, 0, 0, 0.203262, 0, 0, 0 )
-mesh = SubResource( 8 )
+mesh = SubResource( 3 )
 material/0 = null
 
 [node name="CPUParticles" type="CPUParticles" parent="."]
@@ -101,16 +102,15 @@ amount = 32
 one_shot = true
 explosiveness = 0.88
 randomness = 0.15
-mesh = SubResource( 2 )
+mesh = SubResource( 5 )
 spread = 180.0
 gravity = Vector3( 0, 0, 0 )
 initial_velocity = 12.0
-angular_velocity = 0.0
 damping = 10.75
 scale_amount_random = 0.68
 scale_amount_curve = SubResource( 6 )
-color_ramp = SubResource( 4 )
+color_ramp = SubResource( 7 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 autoplay = "explode"
-anims/explode = SubResource( 9 )
+anims/explode = SubResource( 8 )

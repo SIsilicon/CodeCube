@@ -66,7 +66,7 @@ func _on_Copy_pressed():
 	for old_block in new_blocks:
 		var new_block : ProgramBlock = new_blocks[old_block]
 		
-		var sockets : Panel = old_block.get_sockets()
+		var sockets : Array = old_block.get_sockets()
 		for i in sockets.size():
 			if sockets[i].type == 1:
 				var links : Array = get_parent().get_socket_links(sockets[i])
