@@ -1,3 +1,4 @@
+tool
 extends Control
 
 export var links := {}
@@ -11,11 +12,11 @@ var temp_socket_b : Control
 var cutting_links := false
 var cut_links := []
 
-onready var renderer = $LinkRenderer
-onready var selector = $Selector
-
 var socket_count := 0
 var sockets := {}
+
+onready var renderer = $LinkRenderer
+onready var selector = $Selector
 
 func _ready() -> void:
 	for block in get_blocks():
@@ -27,6 +28,9 @@ func _ready() -> void:
 			link[1].block.link_keys.append(link_key)
 			
 			link_key += 1
+	
+	if Engine.editor_hint:
+		set_process(false)
 
 func _input(event : InputEvent) -> void:
 	var undo_redo : UndoRedo = Global.undo_redo

@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=2]
+[gd_scene load_steps=35 format=2]
 
 [ext_resource path="res://Main.gd" type="Script" id=1]
 [ext_resource path="res://button_icons/Grid Button/Grid_Edit_Icon.svg" type="Texture" id=2]
@@ -6,8 +6,6 @@
 [ext_resource path="res://program blocks/ProgramWorkshop.gd" type="Script" id=5]
 [ext_resource path="res://program blocks/LinkHandler.gd" type="Script" id=6]
 [ext_resource path="res://program blocks/LinkRenderer.gd" type="Script" id=7]
-[ext_resource path="res://program blocks/Blocks/Misc Blocks/Start Block.tscn" type="PackedScene" id=8]
-[ext_resource path="res://program blocks/Blocks/Misc Blocks/Stop Block.tscn" type="PackedScene" id=9]
 [ext_resource path="res://program blocks/Selector/Selector.tscn" type="PackedScene" id=10]
 [ext_resource path="res://program blocks/drawer.svg" type="Texture" id=11]
 [ext_resource path="res://program blocks/BlockSelector.gd" type="Script" id=12]
@@ -294,11 +292,14 @@ __meta__ = {
 [node name="ProgramWorkshop" type="Panel" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_left = -1024.0
+margin_right = -1024.0
 custom_styles/panel = SubResource( 6 )
 script = ExtResource( 5 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+save_file = "res://test_prog.ccprogram"
 
 [node name="LinkHandler" type="Control" parent="ProgramWorkshop"]
 anchor_right = 1.0
@@ -322,18 +323,6 @@ script = ExtResource( 7 )
 __meta__ = {
 "_edit_lock_": true
 }
-
-[node name="StartBlock" parent="ProgramWorkshop/LinkHandler" instance=ExtResource( 8 )]
-margin_left = 417.078
-margin_top = 83.6521
-margin_right = 572.078
-margin_bottom = 133.652
-
-[node name="StopBlock" parent="ProgramWorkshop/LinkHandler" instance=ExtResource( 9 )]
-margin_left = 416.834
-margin_top = 462.209
-margin_right = 571.834
-margin_bottom = 512.209
 
 [node name="Selector" parent="ProgramWorkshop/LinkHandler" instance=ExtResource( 10 )]
 margin_left = 20.6505
@@ -419,5 +408,5 @@ __meta__ = {
 [connection signal="pressed" from="Controls/Reset" to="." method="_on_Reset_pressed"]
 [connection signal="toggled" from="MapEditor/Drawer" to="MapEditor" method="_on_Drawer_toggled"]
 [connection signal="pressed" from="ProgramWorkshop/Drawer" to="." method="_on_Drawer_pressed"]
-[connection signal="pressed" from="ProgramWorkshop/Drawer" to="MapEditor" method="_on_Program_Drawer_pressed"]
 [connection signal="pressed" from="ProgramWorkshop/Drawer" to="ProgramWorkshop" method="_on_Drawer_pressed"]
+[connection signal="pressed" from="ProgramWorkshop/Drawer" to="MapEditor" method="_on_Program_Drawer_pressed"]

@@ -1,4 +1,11 @@
+tool
 extends Control
+
+const PROG_VERSION = 1
+
+const SHOW_BLOCKS_IN_EDITOR = true
+
+export(String, FILE, "*.ccprogram") var save_file
 
 var zoom := 1.0
 var zoom_center := Vector2()
@@ -11,6 +18,22 @@ var code := []
 func _ready() -> void:
 	if not expanded:
 		rect_position.x = -rect_size.x
+	
+	if Engine.editor_hint:
+		set_process(false)
+	
+	load_program(save_file)
+
+func _unhandled_input(event) -> void:
+	if expanded and event is InputEventKey and not event.pressed and event.control:
+		match event.scancode:
+			KEY_S:
+				save_program(save_file)
+				get_tree().set_input_as_handled()
+			KEY_O:
+				load_program(save_file)
+				get_parent()._on_Reset_pressed()
+				get_tree().set_input_as_handled()
 
 func _gui_input(event : InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -61,10 +84,7 @@ func drop_data(position : Vector2, data) -> void:
 	block.rect_position = $LinkHandler.get_transform().affine_inverse().xform(position)
 
 func interpret() -> int:
-	for block in $LinkHandler.get_children():
-		if block == $LinkHandler/LinkRenderer:
-			continue
-		
+	for block in $LinkHandler.get_blocks():
 		if block is preload("Blocks/Misc Blocks/Start Block.gd"):
 			code = block.interpret()
 			
@@ -77,6 +97,91 @@ func interpret() -> int:
 	
 	return 3
 
+func save_program(program : String) -> void:
+	var blocks : Array = $LinkHandler.get_blocks()
+	
+	var file := File.new()
+	file.open(program, File.WRITE)
+	file.store_8(PROG_VERSION)
+	file.store_16(blocks.size())
+	file.store_32(0) # placeholder for link list offset
+	
+	var list_offset = 7 # offset from stored values above.
+	var list_size = blocks.size() * 2 # size of list (2 bytes per element)
+	
+	var block_offset = list_offset + list_size
+	for i in blocks.size():
+		var block : ProgramBlock = blocks[i]
+		file.store_16(block_offset)
+		file.seek(block_offset)
+		
+		var block_data := block.serialize()
+		file.store_buffer(block_data)
+		block_offset += block_data.size()
+		
+		file.seek(list_offset + (i + 1) * 2)
+	
+	file.seek(3) # Link list offset
+	file.store_32(block_offset)
+	file.seek(block_offset)
+	
+	for link in $LinkHandler.links:
+		file.store_16(link)
+		file.store_16($LinkHandler.links[link][0])
+		file.store_16($LinkHandler.links[link][1])
+	file.store_16(0xFFFF) # marks end of list
+	
+	file.close()
+
+func load_program(program : String) -> void:
+	var file := File.new()
+	if not file.file_exists(program):
+		return
+	
+	for block in $LinkHandler.get_blocks():
+		$LinkHandler.remove_child(block)
+		block.queue_free()
+	
+	file.open(program, File.READ)
+	
+	var version := file.get_8()
+	var block_num := file.get_16()
+	var link_offset := file.get_32()
+	
+	var list_offset = 7
+	for i in block_num:
+		file.seek(list_offset)
+		var block_offset := file.get_16()
+		file.seek(block_offset)
+		
+		var rect_pos := Vector2(
+				_to_signed_16(file.get_16()),
+				_to_signed_16(file.get_16())
+		)
+		var type := file.get_8()
+		
+		var block = load(ProgramBlock.TYPES[type] + ".tscn").instance()
+		block.rect_position = rect_pos
+		for socket in block.get_sockets():
+			socket.id = file.get_16()
+		
+		if type == ProgramBlock.Type.Turn:
+			block.set_direction(file.get_8())
+		
+		$LinkHandler.add_block(block)
+		
+		if Engine.editor_hint and SHOW_BLOCKS_IN_EDITOR:
+			block.owner = get_parent()
+		list_offset += 2
+	
+	file.seek(link_offset)
+	var key := file.get_16()
+	while key != 0xFFFF:
+		$LinkHandler.add_link(file.get_16(), file.get_16(), key)
+		key = file.get_16()
+	
+	file.close()
+
 func _on_Drawer_pressed():
 	if expanded:
 		$Tween.interpolate_property(self, "rect_position", rect_position, Vector2(-rect_size.x, 0), 0.5, Tween.TRANS_QUAD, Tween.EASE_OUT)
@@ -84,3 +189,8 @@ func _on_Drawer_pressed():
 		$Tween.interpolate_property(self, "rect_position", rect_position, Vector2(), 0.5, Tween.TRANS_QUAD, Tween.EASE_OUT)
 	$Tween.start()
 	expanded = not expanded
+
+func _to_signed_16(val : int) -> int:
+	if val > 0x7FFF:
+		return -(~val & 0xFFFF) - 1
+	return val

@@ -114,6 +114,6 @@ func create_tile(type : int, pos : Vector3) -> StaticBody:
 	return tile
 
 func _to_signed8(val : int) -> int:
-	if val > 127:
+	if val > 0x7F:
 		return -(~val & 0xFF) - 1
 	return val
