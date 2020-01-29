@@ -19,6 +19,7 @@ func _ready():
 		blocks[name] = block
 		
 		var button := Button.new()
+		button.icon = load(file.replace(".tscn", ".svg"))
 		button.group = button_group
 		button.text = name
 		button.focus_mode = Control.FOCUS_NONE

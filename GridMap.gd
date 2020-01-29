@@ -4,7 +4,7 @@ extends Spatial
 const SHOW_TILES_IN_EDITOR = false
 const LVL_VERSION = 3
 
-export(String, FILE, "*.cclevel") var save_file
+export(String, FILE, GLOBAL, "*.cclevel") var save_file
 
 var tiles := {}
 var spawn_tile : Tile

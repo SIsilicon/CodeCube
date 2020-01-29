@@ -18,6 +18,7 @@ const TYPES := [
 	"res://program blocks/Blocks/Action Blocks/Turn Block"
 ]
 
+export(Texture) var icon
 
 var pressed := false
 var dragged := false

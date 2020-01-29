@@ -53,6 +53,10 @@ func _process(delta : float) -> void:
 		spawn_cube()
 
 func spawn_cube() -> void:
+	if not $GridMap.spawn_tile:
+		show_error_msg("Can't place QBoy! There's no spawn tile!")
+		return
+	
 	cube = preload("res://Player/Cube.tscn").instance()
 	add_child_below_node($GridMap, cube)
 	cube.manual_control = manual_control

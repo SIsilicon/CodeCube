@@ -100,6 +100,7 @@ func _unhandled_input(event : InputEvent) -> void:
 					place_wall(point, false)
 				else:
 					var new_tile := tile_to_add.duplicate()
+					new_tile.set_colliding(true)
 					new_tile.set_material_override(null)
 					new_tile.translation = point
 					_grid_map().add_tile(new_tile)
@@ -204,6 +205,7 @@ func _on_Tile_button_pressed(tile_type : int) -> void:
 	var tile := preload("res://tiles/Tile.tscn").instance()
 	tile.type = tile_type
 	tile.set_material_override(select_material)
+	tile.set_colliding(false)
 	add_child(tile)
 	
 	if tile_to_add:
@@ -231,8 +233,8 @@ func _on_Program_Drawer_pressed():
 
 func _on_FileDialog_file_selected(path):
 	if $FileDialog.mode == FileDialog.MODE_SAVE_FILE:
-		_grid_map().save_level(_grid_map().save_file)
+		_grid_map().save_level(path)
 	elif $FileDialog.mode == FileDialog.MODE_OPEN_FILE:
-		_grid_map().load_level(_grid_map().save_file)
+		_grid_map().load_level(path)
 		update_wall_data()
 		get_parent()._on_Reset_pressed()
