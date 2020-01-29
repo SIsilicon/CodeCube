@@ -12,6 +12,8 @@ func on_enter(cube) -> void:
 		cube.play_anim("Cube-jump-roll")
 		cube.linear_velocity = cube.get_dir() * 4.0
 		cube.linear_velocity.y = 15.0
+	
+	cube.face_state = 2
 
 func on_physics_process(cube, delta) -> void:
 	cube.linear_velocity.y -= 40.0 * delta
@@ -21,3 +23,5 @@ func on_physics_process(cube, delta) -> void:
 func on_exit(cube) -> void:
 	if not interrupted:
 		cube.play_anim("Cube-land")
+	
+	cube.face_state = 0

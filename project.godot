@@ -46,6 +46,8 @@ _global_script_class_icons={
 
 config/name="Code Cube"
 run/main_scene="res://Main.tscn"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="Code Cube"
 config/icon="res://icon.png"
 
 [autoload]

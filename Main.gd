@@ -58,7 +58,6 @@ func spawn_cube() -> void:
 	cube.manual_control = manual_control
 	cube.teleport($GridMap.spawn_tile)
 	cube.connect("died", self, "_on_Cube_died")
-	cube.manual_control = true
 	cube_died = false
 
 func pause_node(node : Node, paused : bool) -> void:

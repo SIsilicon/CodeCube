@@ -1,4 +1,3 @@
-tool
 extends Control
 
 export var links := {}
@@ -28,9 +27,6 @@ func _ready() -> void:
 			link[1].block.link_keys.append(link_key)
 			
 			link_key += 1
-	
-	if Engine.editor_hint:
-		set_process(false)
 
 func _input(event : InputEvent) -> void:
 	var undo_redo : UndoRedo = Global.undo_redo

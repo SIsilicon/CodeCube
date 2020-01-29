@@ -1,11 +1,10 @@
-tool
 extends Control
 
 const PROG_VERSION = 1
 
 const SHOW_BLOCKS_IN_EDITOR = true
 
-export(String, FILE, "*.ccprogram") var save_file
+export(String, FILE, "*.ccprogram") var program
 
 var zoom := 1.0
 var zoom_center := Vector2()
@@ -18,21 +17,20 @@ var code := []
 func _ready() -> void:
 	if not expanded:
 		rect_position.x = -rect_size.x
-	
-	if Engine.editor_hint:
-		set_process(false)
-	
-	load_program(save_file)
+	load_program(program)
 
 func _unhandled_input(event) -> void:
 	if expanded and event is InputEventKey and not event.pressed and event.control:
 		match event.scancode:
 			KEY_S:
-				save_program(save_file)
+				$FileDialog.mode = FileDialog.MODE_SAVE_FILE
+				$FileDialog.invalidate()
+				$FileDialog.popup()
 				get_tree().set_input_as_handled()
 			KEY_O:
-				load_program(save_file)
-				get_parent()._on_Reset_pressed()
+				$FileDialog.mode = FileDialog.MODE_OPEN_FILE
+				$FileDialog.invalidate()
+				$FileDialog.popup()
 				get_tree().set_input_as_handled()
 
 func _gui_input(event : InputEvent) -> void:
@@ -182,13 +180,19 @@ func load_program(program : String) -> void:
 	
 	file.close()
 
-func _on_Drawer_pressed():
+func _on_Drawer_pressed() -> void:
 	if expanded:
 		$Tween.interpolate_property(self, "rect_position", rect_position, Vector2(-rect_size.x, 0), 0.5, Tween.TRANS_QUAD, Tween.EASE_OUT)
 	else:
 		$Tween.interpolate_property(self, "rect_position", rect_position, Vector2(), 0.5, Tween.TRANS_QUAD, Tween.EASE_OUT)
 	$Tween.start()
 	expanded = not expanded
+
+func _on_FileDialog_file_selected(path : String) -> void:
+	if $FileDialog.mode == FileDialog.MODE_SAVE_FILE:
+		save_program(path)
+	elif $FileDialog.mode == FileDialog.MODE_OPEN_FILE:
+		load_program(path)
 
 func _to_signed_16(val : int) -> int:
 	if val > 0x7FFF:

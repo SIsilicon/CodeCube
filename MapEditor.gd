@@ -69,12 +69,14 @@ func _unhandled_input(event : InputEvent) -> void:
 	if event is InputEventKey and not event.pressed and event.control:
 		match event.scancode:
 			KEY_S:
-				_grid_map().save_level(_grid_map().save_file)
+				$FileDialog.mode = FileDialog.MODE_SAVE_FILE
+				$FileDialog.invalidate()
+				$FileDialog.popup()
 				get_tree().set_input_as_handled()
 			KEY_O:
-				_grid_map().load_level(_grid_map().save_file)
-				update_wall_data()
-				get_parent()._on_Reset_pressed()
+				$FileDialog.mode = FileDialog.MODE_OPEN_FILE
+				$FileDialog.invalidate()
+				$FileDialog.popup()
 				get_tree().set_input_as_handled()
 	
 	if event is InputEventMouse:
@@ -226,3 +228,11 @@ func _on_Drawer_toggled(button_pressed : bool) -> void:
 func _on_Program_Drawer_pressed():
 	if expanded:
 		$Drawer.pressed = false
+
+func _on_FileDialog_file_selected(path):
+	if $FileDialog.mode == FileDialog.MODE_SAVE_FILE:
+		_grid_map().save_level(_grid_map().save_file)
+	elif $FileDialog.mode == FileDialog.MODE_OPEN_FILE:
+		_grid_map().load_level(_grid_map().save_file)
+		update_wall_data()
+		get_parent()._on_Reset_pressed()
