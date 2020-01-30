@@ -1,6 +1,7 @@
 extends Panel
 
 const HALF = Vector3(0.5, 0.0, 0.5)
+const DEBUG_WALLS = false
 
 export(NodePath) var grid_map
 
@@ -12,10 +13,15 @@ var select_material := SpatialMaterial.new()
 var expanded := false
 
 var tile_to_add : Tile
+var painting := false
+var erasing := false
 var wall_mode := false
 var walls := {}
+var edited_points := []
 
-var debug_walls := ImmediateGeometry.new()
+var undo_redo := UndoRedo.new()
+
+var debug_walls : ImmediateGeometry
 
 func _ready():
 	if not get_parent().sandbox_mode:
@@ -59,60 +65,89 @@ func _ready():
 	
 	_on_Tile_button_pressed(0)
 	
-	if debug_walls:
+	if DEBUG_WALLS and OS.is_debug_build():
+		debug_walls = ImmediateGeometry.new()
 		debug_walls.material_override = SpatialMaterial.new()
 		debug_walls.material_override.flags_use_point_size = true
 		debug_walls.material_override.params_point_size = 4.0
 		add_child(debug_walls)
 
 func _unhandled_input(event : InputEvent) -> void:
-	if event is InputEventKey and not event.pressed and event.control:
-		match event.scancode:
-			KEY_S:
-				$FileDialog.mode = FileDialog.MODE_SAVE_FILE
-				$FileDialog.invalidate()
-				$FileDialog.popup()
-				get_tree().set_input_as_handled()
-			KEY_O:
-				$FileDialog.mode = FileDialog.MODE_OPEN_FILE
-				$FileDialog.invalidate()
-				$FileDialog.popup()
-				get_tree().set_input_as_handled()
-	
-	if event is InputEventMouse:
-		var viewport := get_viewport()
-		var mouse := viewport.get_mouse_position()
-		var ray := viewport.get_camera().project_ray_normal(mouse)
-		var origin := viewport.get_camera().project_ray_origin(mouse)
+	if not get_node("../ProgramWorkshop").expanded:
 		
-		var plane := Plane(Vector3.UP, 0)
-		var point := plane.intersects_ray(origin, ray)
-		if point and tile_to_add:
-			if wall_mode:
-				point = (point - HALF).snapped(Vector3(1,1,1)) + HALF
-			else:
-				point = point.snapped(Vector3(1,1,1))
+		if event is InputEventMouseMotion:
+			var viewport := get_viewport()
+			var mouse := viewport.get_mouse_position()
+			var ray := viewport.get_camera().project_ray_normal(mouse)
+			var origin := viewport.get_camera().project_ray_origin(mouse)
 			
-			tile_to_add.translation = point
-			
-			if Input.is_mouse_button_pressed(BUTTON_LEFT):
+			var plane := Plane(Vector3.UP, 0)
+			var point := plane.intersects_ray(origin, ray)
+			if point and tile_to_add:
 				if wall_mode:
-					place_wall(point, false)
+					point = (point - HALF).snapped(Vector3(1,1,1)) + HALF
 				else:
-					var new_tile := tile_to_add.duplicate()
-					new_tile.set_colliding(true)
-					new_tile.set_material_override(null)
-					new_tile.translation = point
-					_grid_map().add_tile(new_tile)
+					point = point.snapped(Vector3(1,1,1))
 				
-				get_tree().set_input_as_handled()
-			elif Input.is_mouse_button_pressed(BUTTON_RIGHT):
-				if wall_mode:
-					place_wall(point, true)
-				elif _grid_map().tiles.has(point):
-					_grid_map().remove_tile(_grid_map().tiles[point])
+				tile_to_add.translation = point
+			
+			if not edited_points.has(point) and (painting or erasing):
+				if painting:
+					if wall_mode:
+						place_wall(point, false, true)
+					else:
+						var new_tile := tile_to_add.duplicate()
+						new_tile.set_colliding(true)
+						new_tile.set_material_override(null)
+						new_tile.translation = point
+						if not _grid_map().tiles.has(point + Vector3.UP): # checking for wall
+							var other_tile = _grid_map().add_tile(new_tile, true)
+							
+							undo_redo.add_do_method(_grid_map(), "add_tile", new_tile, true)
+							if other_tile:
+								undo_redo.add_undo_method(_grid_map(), "add_tile", other_tile, true)
+							else:
+								undo_redo.add_undo_method(_grid_map(), "remove_tile", new_tile, false)
+							
+					
+					get_tree().set_input_as_handled()
+				elif erasing:
+					if wall_mode:
+						place_wall(point, true, true)
+					elif _grid_map().tiles.has(point):
+						var other_tile : Tile = _grid_map().tiles[point]
+						
+						_grid_map().remove_tile(other_tile, false)
+						undo_redo.add_do_method(_grid_map(), "remove_tile", other_tile, false)
+						undo_redo.add_undo_method(_grid_map(), "add_tile", other_tile, true)
+					
+					get_tree().set_input_as_handled()
 				
-				get_tree().set_input_as_handled()
+				edited_points.append(point)
+		
+		if event is InputEventMouseButton:
+			if event.button_index == BUTTON_LEFT:
+				painting = event.pressed
+			elif event.button_index == BUTTON_RIGHT:
+				erasing = event.pressed
+			else:
+				return
+			
+			if event.pressed:
+				undo_redo.create_action("Paint Tiles/Walls" if painting else "Erase Tiles/Walls")
+				var fake_event := InputEventMouseMotion.new()
+				_unhandled_input(fake_event)
+			else:
+				undo_redo.commit_action()
+				edited_points.clear()
+
+func _input(event : InputEvent) -> void:
+	if event.is_action_pressed("undo"):
+		undo_redo.undo()
+		accept_event()
+	elif event.is_action_pressed("redo"):
+		undo_redo.redo()
+		accept_event()
 
 func _process(delta : float) -> void:
 	if debug_walls:
@@ -122,9 +157,22 @@ func _process(delta : float) -> void:
 			debug_walls.add_vertex(Vector3(pos.x - 0.5, 1.1, pos.y - 0.5))
 		debug_walls.end()
 
-func place_wall(pos : Vector3, erase : bool) -> void:
+func place_wall(pos : Vector3, erase : bool, set_undo_redo := false) -> void:
 	pos += HALF
+	
+	if not erase:
+		for i in range(0, 4):
+			var tile_pos := Vector3(i % 2 - 1, 0.0, i / 2 - 1)
+			tile_pos += pos
+			if _grid_map().tiles.has(tile_pos):
+				return
+	
+	var prev_wall := get_wall(pos.x, pos.z)
 	set_wall(pos.x, pos.z, not erase)
+	
+	if prev_wall != get_wall(pos.x, pos.z) and set_undo_redo:
+		undo_redo.add_do_method(self, "place_wall", pos - HALF, erase)
+		undo_redo.add_undo_method(self, "place_wall", pos - HALF, not erase)
 	
 	for z in range(-1, 1):
 		for x in range(-1, 1):
@@ -236,5 +284,26 @@ func _on_FileDialog_file_selected(path):
 		_grid_map().save_level(path)
 	elif $FileDialog.mode == FileDialog.MODE_OPEN_FILE:
 		_grid_map().load_level(path)
+		undo_redo.clear_history()
 		update_wall_data()
 		get_parent()._on_Reset_pressed()
+
+func _on_Save_pressed():
+	if expanded:
+		if not _grid_map().spawn_tile:
+			get_parent().show_error_msg("This level doesn't have a spawn tile!")
+			return
+		
+		$FileDialog.mode = FileDialog.MODE_SAVE_FILE
+		$FileDialog.invalidate()
+		$FileDialog.popup_centered()
+
+func _on_Open_pressed():
+	if expanded:
+		$FileDialog.mode = FileDialog.MODE_OPEN_FILE
+		$FileDialog.invalidate()
+		$FileDialog.popup_centered()
+
+func _on_visibility_changed():
+	if tile_to_add:
+		tile_to_add.visible = visible

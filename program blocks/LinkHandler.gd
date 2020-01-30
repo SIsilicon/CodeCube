@@ -29,7 +29,7 @@ func _ready() -> void:
 			link_key += 1
 
 func _input(event : InputEvent) -> void:
-	var undo_redo : UndoRedo = Global.undo_redo
+	var undo_redo : UndoRedo = get_parent().undo_redo
 	
 	# Select all blocks
 	if event is InputEventKey and event.pressed and event.scancode == KEY_A and event.control:
@@ -38,6 +38,7 @@ func _input(event : InputEvent) -> void:
 			undo_redo.add_undo_method(selector, "remove_from_selection", block)
 			undo_redo.add_do_method(selector, "add_to_selection", block, false)
 		undo_redo.commit_action()
+		get_tree().set_input_as_handled()
 	
 	# Releasing deletes links in cut_links
 	if event is InputEventMouseButton and event.button_index == BUTTON_LEFT:
@@ -101,7 +102,7 @@ func _process(delta : float) -> void:
 			renderer.end_vec = temp_socket_a.get_position()
 	
 	if temp_socket_a and temp_socket_b:
-		var undo_redo : UndoRedo = Global.undo_redo
+		var undo_redo : UndoRedo = get_parent().undo_redo
 		undo_redo.create_action("Create link")
 		undo_redo.add_do_method(self, "add_link", temp_socket_a.id, temp_socket_b.id, link_key)
 		undo_redo.add_undo_method(self, "remove_link", link_key)
@@ -114,7 +115,7 @@ func _process(delta : float) -> void:
 		dragging_link = false
 
 func _on_block_selected(multi_select : bool, block : ProgramBlock) -> void:
-	var undo_redo : UndoRedo = Global.undo_redo
+	var undo_redo : UndoRedo = get_parent().undo_redo
 	undo_redo.create_action("Select block")
 	if multi_select:
 		undo_redo.add_do_method(selector, "add_to_selection", block, true)

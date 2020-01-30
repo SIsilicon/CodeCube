@@ -1,7 +1,6 @@
 extends Control
 
 const PROG_VERSION = 1
-
 const SHOW_BLOCKS_IN_EDITOR = true
 
 export(String, FILE, "*.ccprogram") var program
@@ -12,26 +11,13 @@ var zoom_center := Vector2()
 var dragging := false
 var expanded := false
 
+var undo_redo := UndoRedo.new()
 var code := []
 
 func _ready() -> void:
 	if not expanded:
 		rect_position.x = -rect_size.x
 	load_program(program)
-
-func _unhandled_input(event) -> void:
-	if expanded and event is InputEventKey and not event.pressed and event.control:
-		match event.scancode:
-			KEY_S:
-				$FileDialog.mode = FileDialog.MODE_SAVE_FILE
-				$FileDialog.invalidate()
-				$FileDialog.popup()
-				get_tree().set_input_as_handled()
-			KEY_O:
-				$FileDialog.mode = FileDialog.MODE_OPEN_FILE
-				$FileDialog.invalidate()
-				$FileDialog.popup()
-				get_tree().set_input_as_handled()
 
 func _gui_input(event : InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -49,20 +35,23 @@ func _gui_input(event : InputEvent) -> void:
 		elif event.button_index == BUTTON_LEFT and not event.pressed:
 			$LinkHandler/Selector.clear_selection()
 			accept_event()
-		
-		zoom = clamp(zoom, 0.125, 4.0)
+	
+	zoom = clamp(zoom, 0.125, 4.0)
 	
 	if event is InputEventMouseMotion and dragging:
 		$LinkHandler.rect_position += event.relative
 		accept_event()
 
-func _process(delta : float) -> void:
+func _input(event : InputEvent) -> void:
 	if expanded:
-		if Input.is_action_just_released("undo"):
-			Global.undo_redo.undo()
-		elif Input.is_action_just_released("redo"):
-			Global.undo_redo.redo()
-	
+		if event.is_action_pressed("undo"):
+			undo_redo.undo()
+			accept_event()
+		elif event.is_action_pressed("redo"):
+			undo_redo.redo()
+			accept_event()
+
+func _process(delta : float) -> void:
 	var new_scale : Vector2 = $LinkHandler.rect_scale.linear_interpolate(Vector2(1, 1) * zoom, delta * 10.0)
 	var zoom_ratio = new_scale / $LinkHandler.rect_scale
 	$LinkHandler.rect_scale = new_scale
@@ -74,7 +63,6 @@ func can_drop_data(position : Vector2, data) -> bool:
 func drop_data(position : Vector2, data) -> void:
 	var block = data.duplicate()
 	
-	var undo_redo = Global.undo_redo
 	undo_redo.create_action("Add Block(s)")
 	undo_redo.add_do_method($LinkHandler, "add_block", block)
 	undo_redo.add_undo_method($LinkHandler, "remove_child", block)
@@ -193,6 +181,19 @@ func _on_FileDialog_file_selected(path : String) -> void:
 		save_program(path)
 	elif $FileDialog.mode == FileDialog.MODE_OPEN_FILE:
 		load_program(path)
+		undo_redo.clear_history()
+
+func _on_Save_pressed():
+	if expanded:
+		$FileDialog.mode = FileDialog.MODE_SAVE_FILE
+		$FileDialog.invalidate()
+		$FileDialog.popup_centered()
+
+func _on_Open_pressed():
+	if expanded:
+		$FileDialog.mode = FileDialog.MODE_OPEN_FILE
+		$FileDialog.invalidate()
+		$FileDialog.popup_centered()
 
 func _to_signed_16(val : int) -> int:
 	if val > 0x7FFF:

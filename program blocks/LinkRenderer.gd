@@ -35,13 +35,20 @@ func _draw() -> void:
 	
 	draw_set_transform(-rect_position, 0, Vector2(1, 1))
 	for i in range(0, points.size(), 2):
-		var begin = points[i]
-		var end = points[i+1]
+		var begin : Vector2 = points[i]
+		var end : Vector2 = points[i+1]
+		
+		var curve_strength := begin.distance_to(end) * 0.35
+		
+		var curve := Curve2D.new()
+		curve.add_point(begin, Vector2(), Vector2.DOWN * curve_strength)
+		curve.add_point(end, Vector2.UP * curve_strength, Vector2())
+		var curve_points := curve.tessellate()
 		
 		if i == points.size() - 2 and dragging_link:
-			draw_line(begin, end, Color.burlywood, 1.5, true)
+			draw_polyline(curve_points, Color.burlywood, 1.5, true)
 		else:
-			draw_line(begin, end, Color.white, 1.5, true)
+			draw_polyline(curve_points, Color.white, 1.5, true)
 	
 	draw_set_transform_matrix(get_global_transform().affine_inverse())
 	if cut_line.size() > 1:

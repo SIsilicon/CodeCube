@@ -84,9 +84,8 @@ func load_level(level : String) -> void:
 	
 	file.close()
 
-func remove_tile(tile : Tile) -> void:
+func remove_tile(tile : Tile, delete := true) -> void:
 	remove_child(tile)
-	tile.queue_free()
 	tiles.erase(tile.translation)
 	
 	if tile == spawn_tile:
@@ -94,16 +93,24 @@ func remove_tile(tile : Tile) -> void:
 			if tiles[pos].type == Tile.Type.Spawn:
 				spawn_tile = tile
 				break
+	
+	if delete:
+		tile.queue_free()
 
-func add_tile(tile : Tile) -> void:
+func add_tile(tile : Tile, return_other_tile := false):
 	var pos := tile.translation
+	var other_tile : Tile
 	if tiles.has(pos):
-		remove_tile(tiles[pos])
+		other_tile = tiles[pos]
+		remove_tile(other_tile, not return_other_tile)
 	add_child(tile)
 	tiles[pos] = tile
 	
 	if tile.type == Tile.Type.Spawn:
 		spawn_tile = tile
+	
+	if return_other_tile:
+		return other_tile
 
 func create_tile(type : int, pos : Vector3) -> StaticBody:
 	var tile = preload("res://tiles/Tile.tscn").instance()
