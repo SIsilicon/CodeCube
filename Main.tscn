@@ -280,7 +280,7 @@ Button/styles/pressed = SubResource( 23 )
 [sub_resource type="StyleBoxFlat" id=25]
 bg_color = Color( 1, 0.254902, 0.254902, 0.498039 )
 
-[node name="Spatial" type="Spatial"]
+[node name="Main" type="Spatial"]
 script = ExtResource( 1 )
 sandbox_mode = true
 manual_control = true
@@ -373,7 +373,7 @@ script = ExtResource( 23 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-grid_map = NodePath("../GridMap")
+grid_map = NodePath("../../Main/GridMap")
 
 [node name="Viewport" type="Viewport" parent="MapEditor"]
 size = Vector2( 128, 128 )
@@ -633,7 +633,7 @@ __meta__ = {
 [connection signal="file_selected" from="MapEditor/FileDialog" to="MapEditor" method="_on_FileDialog_file_selected"]
 [connection signal="pressed" from="ProgramWorkshop/File/Save" to="ProgramWorkshop" method="_on_Save_pressed"]
 [connection signal="pressed" from="ProgramWorkshop/File/Open" to="ProgramWorkshop" method="_on_Open_pressed"]
-[connection signal="pressed" from="ProgramWorkshop/Drawer" to="MapEditor" method="_on_Program_Drawer_pressed"]
 [connection signal="pressed" from="ProgramWorkshop/Drawer" to="ProgramWorkshop" method="_on_Drawer_pressed"]
+[connection signal="pressed" from="ProgramWorkshop/Drawer" to="MapEditor" method="_on_Program_Drawer_pressed"]
 [connection signal="pressed" from="ProgramWorkshop/Drawer" to="." method="_on_Drawer_pressed"]
 [connection signal="file_selected" from="ProgramWorkshop/FileDialog" to="ProgramWorkshop" method="_on_FileDialog_file_selected"]
