@@ -11,6 +11,8 @@ var executing := false
 var linear_velocity := Vector3()
 var tile : Tile
 
+var face_state := 0 setget set_face_state
+
 onready var anim_player := $AnimationPlayer
 onready var tween := $Tween
 
@@ -58,6 +60,20 @@ func _ready() -> void:
 	translation = translation.round()
 	rotation.y = stepify(rotation.y, PI/2)
 
+func _unhandled_input(event : InputEvent) -> void:
+	if not moving:
+		if manual_control:
+			if event.is_action_pressed("ui_up"):
+				$FSM.go_to("rolling")
+			elif event.is_action_pressed("jump"):
+				$FSM.go_to("jumping")
+			elif event.is_action_pressed("ui_left"):
+				turn_direction = 1
+				$FSM.go_to("turning")
+			elif event.is_action_pressed("ui_right"):
+				turn_direction = -1
+				$FSM.go_to("turning")
+
 func _physics_process(delta : float) -> void:
 	$CollisionShape.transform = $Cube.transform
 	
@@ -65,22 +81,12 @@ func _physics_process(delta : float) -> void:
 		if not weakref(tile).get_ref():
 			tile = null
 	
-	if not moving:
-		if manual_control:
-			if Input.is_action_pressed("ui_up"):
-				$FSM.go_to("rolling")
-			elif Input.is_action_just_pressed("jump"):
-				$FSM.go_to("jumping")
-			elif Input.is_action_pressed("ui_left"):
-				turn_direction = 1
-				$FSM.go_to("turning")
-			elif Input.is_action_pressed("ui_right"):
-				turn_direction = -1
-				$FSM.go_to("turning")
-	
 	translation += linear_velocity * delta
 	if translation.y < -25.0:
 		die()
+
+func _exit_tree() -> void:
+	set_face_state(0)
 
 func show_loading_icon() -> void:
 	$LoadingIcon.show()
@@ -164,3 +170,21 @@ func set_moving(value : bool) -> void:
 		return
 	moving = value
 
+func set_face_state(value : int) -> void:
+	face_state = value
+	
+	var eye_offset := Vector3()
+	eye_offset.x += 0.25 * face_state
+	$Cube.mesh.surface_get_material(0).uv1_offset = eye_offset
+
+func _on_Blink_timeout():
+	if face_state == 0:
+		set_face_state(1)
+	elif face_state == 1:
+		set_face_state(0)
+	
+	if face_state:
+		$Blink.wait_time = rand_range(0.08, 0.2)
+	else:
+		$Blink.wait_time = rand_range(0.3, 3.0)
+	$Blink.start()

@@ -34,7 +34,7 @@ func _process(delta : float) -> void:
 		rect_size = rect.size
 
 func _on_Delete_pressed():
-	var undo_redo : UndoRedo = Global.undo_redo
+	var undo_redo : UndoRedo = get_node("../..").undo_redo
 	undo_redo.create_action("Delete block(s)")
 	undo_redo.add_undo_property(get_parent(), "links", get_parent().links.duplicate())
 	for block in selected_blocks:
@@ -47,7 +47,7 @@ func _on_Delete_pressed():
 	undo_redo.commit_action()
 
 func _on_Copy_pressed():
-	var undo_redo : UndoRedo = Global.undo_redo
+	var undo_redo : UndoRedo = get_node("../..").undo_redo
 	undo_redo.create_action("Duplicate Block(s)")
 	
 	var new_blocks := {}

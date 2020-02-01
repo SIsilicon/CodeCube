@@ -1,5 +1,10 @@
 extends ActionBlock
 
+enum Direction {
+	Left,
+	Right
+}
+
 var string = "turn left"
 
 func interpret() -> Array:
@@ -14,6 +19,14 @@ func interpret() -> Array:
 		code += next_block.interpret()
 	
 	return code
+
+func set_direction(dir : int) -> void:
+	$Option.selected = dir
+
+func serialize() -> PoolByteArray:
+	var array := .serialize()
+	array.append($Option.selected)
+	return array
 
 func _on_action_selected(ID : int) -> void:
 	match ID:

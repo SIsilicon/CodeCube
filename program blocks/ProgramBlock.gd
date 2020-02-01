@@ -4,7 +4,21 @@ class_name ProgramBlock
 signal selected(multi_selcect)
 signal dragged(velocity)
 
-const DEBUG_INTERPRET_STACK := true
+enum Type {
+	Start, Stop,
+	Jump, Move, Turn
+}
+
+const DEBUG_INTERPRET_STACK := false
+const TYPES := [
+	"res://program blocks/Blocks/Misc Blocks/Start Block",
+	"res://program blocks/Blocks/Misc Blocks/Stop Block",
+	"res://program blocks/Blocks/Action Blocks/Jump Block",
+	"res://program blocks/Blocks/Action Blocks/Move Block",
+	"res://program blocks/Blocks/Action Blocks/Turn Block"
+]
+
+export(Texture) var icon
 
 var pressed := false
 var dragged := false
@@ -72,3 +86,15 @@ func get_sockets() -> Array:
 		if child is preload("res://program blocks/Socket.gd"):
 			sockets.append(child)
 	return sockets
+
+func serialize() -> PoolByteArray:
+	var array := PoolByteArray()
+	array.append_array([int(rect_position.x), int(rect_position.x) >> 8])
+	array.append_array([int(rect_position.y), int(rect_position.y) >> 8])
+	array.append(TYPES.find(get_script().resource_path.rstrip(".gd")))
+	
+	for socket in get_sockets():
+		array.append_array([socket.id, socket.id >> 8])
+	
+	return array
+

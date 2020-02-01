@@ -78,3 +78,6 @@ func set_material_override(material : Material, node = self) -> void:
 	
 	for child in node.get_children():
 		set_material_override(material, child)
+
+func set_colliding(value : bool) -> void:
+	collision_layer = int(value)

@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://program blocks/Blocks/Action Blocks/Jump Block.gd" type="Script" id=1]
 [ext_resource path="res://program blocks/Socket.tscn" type="PackedScene" id=2]
+[ext_resource path="res://program blocks/Blocks/Action Blocks/Jump Block.svg" type="Texture" id=3]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.392157, 0.254902, 0.611765, 0.65098 )
@@ -15,6 +16,28 @@ corner_radius_top_right = 20
 corner_radius_bottom_right = 20
 corner_radius_bottom_left = 20
 
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.137255, 0.137255, 0.137255, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0.137255, 0.137255, 0.137255, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
 [node name="JumpBlock" type="Panel"]
 margin_right = 120.0
 margin_bottom = 54.66
@@ -24,6 +47,7 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+icon = ExtResource( 3 )
 
 [node name="Label" type="Label" parent="."]
 anchor_left = 0.5
@@ -45,6 +69,8 @@ margin_left = -8.0
 margin_top = -8.0
 margin_right = 8.0
 margin_bottom = 8.0
+rect_rotation = -180.0
+custom_styles/panel = SubResource( 2 )
 
 [node name="Outflow" parent="." instance=ExtResource( 2 )]
 anchor_top = 1.0
@@ -53,4 +79,5 @@ margin_left = -8.0
 margin_top = -8.66
 margin_right = 8.0
 margin_bottom = 7.34
+custom_styles/panel = SubResource( 3 )
 type = 1
