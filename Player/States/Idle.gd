@@ -2,7 +2,10 @@ extends State
 
 func on_enter(cube) -> void:
 	cube.linear_velocity = Vector3()
-	cube.moving = false
+	
+	if cube.tween:
+		cube.tween.interpolate_callback(cube, 0.2, "set_moving", false)
+		cube.tween.start()
 
 func on_physics_process(cube, delta) -> void:
 	if cube.tile:

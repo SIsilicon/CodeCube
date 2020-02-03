@@ -1,7 +1,11 @@
 extends ActionBlock
 
 func interpret() -> Array:
-	var code := ["move"]
+	var code := .interpret()
+	if not code.empty() and code[0] == "already visited":
+		return code
+	
+	code.append("move")
 	
 	if DEBUG_INTERPRET_STACK:
 		prints("move-block", self)

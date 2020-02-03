@@ -1,0 +1,108 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://program blocks/Blocks/Loop Blocks/Loop End Block.gd" type="Script" id=1]
+[ext_resource path="res://program blocks/Socket.tscn" type="PackedScene" id=2]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.756863, 0.823529, 0.176471, 0.65098 )
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color( 0.278431, 0.282353, 0.0313726, 1 )
+corner_radius_top_left = 61
+corner_radius_top_right = 61
+corner_radius_bottom_right = 61
+corner_radius_bottom_left = 61
+corner_detail = 1
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.137255, 0.137255, 0.137255, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0.137255, 0.137255, 0.137255, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0.137255, 0.137255, 0.137255, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[node name="LoopEndBlock" type="Panel"]
+margin_right = 203.0
+margin_bottom = 47.0
+custom_styles/panel = SubResource( 1 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -37.5737
+margin_top = -12.9009
+margin_right = 42.4263
+margin_bottom = 9.09911
+text = "Loop End"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Inflow" parent="." instance=ExtResource( 2 )]
+anchor_top = 0.0
+anchor_bottom = 0.0
+margin_left = -8.0
+margin_top = -8.0
+margin_right = 8.0
+margin_bottom = 8.0
+rect_rotation = -180.0
+custom_styles/panel = SubResource( 2 )
+
+[node name="LoopBack" parent="." instance=ExtResource( 2 )]
+anchor_left = 0.0336993
+anchor_top = 0.485239
+anchor_right = 0.0336993
+anchor_bottom = 0.485239
+margin_left = -8.0
+margin_top = -8.0
+margin_right = 8.0
+margin_bottom = 8.0
+rect_rotation = -270.0
+custom_styles/panel = SubResource( 3 )
+type = 1
+
+[node name="Outflow" parent="." instance=ExtResource( 2 )]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = -8.0
+margin_top = -8.66
+margin_right = 8.0
+margin_bottom = 7.34
+custom_styles/panel = SubResource( 4 )
+type = 1

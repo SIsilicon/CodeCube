@@ -73,9 +73,13 @@ func interpret() -> int:
 	for block in $LinkHandler.get_blocks():
 		if block is preload("Blocks/Misc Blocks/Start Block.gd"):
 			code = block.interpret()
+			for b in $LinkHandler.get_blocks():
+				b.visited = false
 			
 			if code.size() == 0:
 				return 1
+			elif code[0] == "already visited":
+				return 4
 			elif code[-1] != "stop":
 				return 2
 			else:
@@ -153,7 +157,8 @@ func load_program(program : String) -> void:
 		
 		if type == ProgramBlock.Type.Turn:
 			block.set_direction(file.get_8())
-		
+		elif type == ProgramBlock.Type.CounterLoop:
+			block.set_count(file.get_8())
 		$LinkHandler.add_block(block)
 		
 		if Engine.editor_hint and SHOW_BLOCKS_IN_EDITOR:
@@ -161,11 +166,16 @@ func load_program(program : String) -> void:
 		list_offset += 2
 	
 	file.seek(link_offset)
+	var max_key := 0
 	var key := file.get_16()
 	while key != 0xFFFF:
 		$LinkHandler.add_link(file.get_16(), file.get_16(), key)
+		
+		max_key = max(max_key, key)
 		key = file.get_16()
+		max_key = max(max_key, key)
 	
+	$LinkHandler.link_key = max_key + 1
 	file.close()
 
 func _on_Drawer_pressed() -> void:

@@ -6,16 +6,19 @@ signal dragged(velocity)
 
 enum Type {
 	Start, Stop,
-	Jump, Move, Turn
+	Jump, Move, Turn,
+	CounterLoop, LoopEnd
 }
 
-const DEBUG_INTERPRET_STACK := false
+const DEBUG_INTERPRET_STACK := true
 const TYPES := [
 	"res://program blocks/Blocks/Misc Blocks/Start Block",
 	"res://program blocks/Blocks/Misc Blocks/Stop Block",
 	"res://program blocks/Blocks/Action Blocks/Jump Block",
 	"res://program blocks/Blocks/Action Blocks/Move Block",
-	"res://program blocks/Blocks/Action Blocks/Turn Block"
+	"res://program blocks/Blocks/Action Blocks/Turn Block",
+	"res://program blocks/Blocks/Loop Blocks/Counter Loop Block",
+	"res://program blocks/Blocks/Loop Blocks/Loop End Block"
 ]
 
 export(Texture) var icon
@@ -29,6 +32,8 @@ var link_keys := []
 
 var unselected_color : Color
 var selected := false
+
+var visited := false # Used during interpretation
 
 func _gui_input(event : InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == BUTTON_LEFT:
@@ -66,7 +71,11 @@ func _exit_tree() -> void:
 			link_handler.unregister_socket(socket)
 
 func interpret() -> Array:
-	return []
+	if visited:
+		return ["already visited"]
+	else:
+		visited = true
+		return []
 
 func set_link_handler(value : Control) -> void:
 	var prev_handler := link_handler
@@ -86,6 +95,12 @@ func get_sockets() -> Array:
 		if child is preload("res://program blocks/Socket.gd"):
 			sockets.append(child)
 	return sockets
+
+func get_socket_link(socket : Panel) -> int:
+	for link_key in link_keys:
+		if link_handler.get_socket(link_key, false) == socket:
+			return link_key
+	return -1
 
 func serialize() -> PoolByteArray:
 	var array := PoolByteArray()

@@ -1,5 +1,6 @@
-tool
 extends Control
+
+const RENDER_CURVES = true
 
 var dragging_link := false
 var begin_vec := Vector2()
@@ -11,10 +12,11 @@ func _draw() -> void:
 	var rect := Rect2()
 	
 	var points := []
+	var vectors := []
 	
 	for link in get_parent().links:
-		var socket_a = get_parent().get_socket(link, false)
-		var socket_b = get_parent().get_socket(link, true)
+		var socket_a : Panel = get_parent().get_socket(link, false)
+		var socket_b : Panel = get_parent().get_socket(link, true)
 		
 		var point_a : Vector2 = socket_a.get_position()
 		var point_b : Vector2 = socket_b.get_position()
@@ -23,12 +25,17 @@ func _draw() -> void:
 		rect = rect.expand(point_b)
 		points.append(point_a)
 		points.append(point_b)
-		
+		vectors.append(socket_a.get_transform().y)
+		vectors.append(socket_b.get_transform().y)
+	
 	if dragging_link:
 		rect = rect.expand(begin_vec)
 		rect = rect.expand(end_vec)
 		points.append(begin_vec)
 		points.append(end_vec)
+		vectors.append(Vector2.DOWN)
+		vectors.append(Vector2.UP)
+	
 	
 	rect_size = rect.size
 	rect_position = rect.position
@@ -38,11 +45,11 @@ func _draw() -> void:
 		var begin : Vector2 = points[i]
 		var end : Vector2 = points[i+1]
 		
-		var curve_strength := begin.distance_to(end) * 0.35
+		var curve_strength := min(begin.distance_to(end) * 0.35, 40.0)
 		
 		var curve := Curve2D.new()
-		curve.add_point(begin, Vector2(), Vector2.DOWN * curve_strength)
-		curve.add_point(end, Vector2.UP * curve_strength, Vector2())
+		curve.add_point(begin, Vector2(), vectors[i] * curve_strength)
+		curve.add_point(end, vectors[i+1] * curve_strength, Vector2())
 		var curve_points := curve.tessellate()
 		
 		if i == points.size() - 2 and dragging_link:

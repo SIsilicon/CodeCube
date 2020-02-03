@@ -14,6 +14,8 @@ var interpreting := false
 var playing := false
 var show_controls := true
 
+var current_instruction : Label
+
 var cube_died := false
 
 func _ready() -> void:
@@ -62,6 +64,7 @@ func spawn_cube() -> void:
 	cube.manual_control = manual_control
 	cube.teleport($GridMap.spawn_tile)
 	cube.connect("died", self, "_on_Cube_died")
+	cube.connect("read_instruction", self, "_on_instruction_read")
 	cube_died = false
 
 func pause_node(node : Node, paused : bool) -> void:
@@ -91,7 +94,7 @@ func show_error_msg(msg : String) -> void:
 func _on_Cube_died() -> void:
 	cube_died = true
 
-func _on_Play_pressed():
+func _on_Play_pressed() -> void:
 	if not interpreting and not playing:
 		interpreting = true
 		cube.show_loading_icon()
@@ -99,6 +102,7 @@ func _on_Play_pressed():
 		var error = $ProgramWorkshop.interpret()
 		yield(get_tree().create_timer(0.5, true), "timeout")
 		
+		print($ProgramWorkshop.code)
 		interpreting = false
 		cube.hide_loading_icon()
 		
@@ -107,6 +111,7 @@ func _on_Play_pressed():
 				1: show_error_msg("The start block is not connected to anything!")
 				2: show_error_msg("There is no stop block connected to the blocks!")
 				3: show_error_msg("There is no start block!")
+				4: show_error_msg("There is a cyclic link in the program!")
 			return
 		
 		$Controls/Play.hide()
@@ -114,7 +119,7 @@ func _on_Play_pressed():
 		$Controls/Reset.show()
 		
 		playing = true
-		cube.code = $ProgramWorkshop.code
+		load_instructions($ProgramWorkshop.code)
 		cube.execute()
 	
 	if cube_exists() and playing:
@@ -122,14 +127,14 @@ func _on_Play_pressed():
 		$Controls/Play.hide()
 		$Controls/Pause.show()
 
-func _on_Pause_pressed():
+func _on_Pause_pressed() -> void:
 	$Controls/Pause.hide()
 	$Controls/Play.show()
 	
 	if cube_exists():
 		pause_node(cube, true)
 
-func _on_Reset_pressed():
+func _on_Reset_pressed() -> void:
 	if cube_exists():
 		cube.executing = false
 		cube.teleport($GridMap.spawn_tile)
@@ -141,8 +146,10 @@ func _on_Reset_pressed():
 	$Controls/Reset.hide()
 	$Controls/Pause.hide()
 	$Controls/Play.show()
+	
+	load_instructions([])
 
-func _on_Drawer_pressed():
+func _on_Drawer_pressed() -> void:
 	if show_controls:
 		$Tween.interpolate_property($Controls, "rect_position", $Controls.rect_position,
 				Vector2(0, -$Controls.rect_size.y), 0.5, Tween.TRANS_QUAD, Tween.EASE_IN_OUT)
@@ -153,5 +160,31 @@ func _on_Drawer_pressed():
 	$Tween.start()
 	show_controls = not show_controls
 
+func _on_instruction_read(line_num : int) -> void:
+	if current_instruction:
+		current_instruction.get_stylebox("normal", "").border_color = Color(0.070588, 0.070588, 0.070588)
+	
+	current_instruction = $Instructions/VBox.get_child(line_num)
+	current_instruction.get_stylebox("normal", "").border_color = Color.white
+
 func cube_exists() -> bool:
 	return weakref(cube).get_ref() != null
+
+func load_instructions(code : Array) -> void:
+	var template := $Instructions/Template
+	var vbox := $Instructions/VBox
+	
+	for child in vbox.get_children():
+		vbox.remove_child(child)
+	for instruction in code:
+		var label : Label = template.duplicate()
+		label.text = instruction
+		var stylebox := label.get_stylebox("normal", "").duplicate()
+		label.add_stylebox_override("normal", stylebox)
+		label.show()
+		vbox.add_child(label)
+	
+	if cube_exists():
+		cube.code = code
+	
+	current_instruction = null

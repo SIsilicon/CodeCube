@@ -1,4 +1,4 @@
-[gd_scene load_steps=48 format=2]
+[gd_scene load_steps=49 format=2]
 
 [ext_resource path="res://Main.gd" type="Script" id=1]
 [ext_resource path="res://button_icons/Grid Button/Grid_Edit_Icon.svg" type="Texture" id=2]
@@ -84,6 +84,13 @@ glow_bicubic_upscale = true
 adjustment_enabled = true
 adjustment_brightness = 0.99
 adjustment_contrast = 1.22
+
+[sub_resource type="StyleBoxFlat" id=26]
+bg_color = Color( 0.133333, 0.133333, 0.133333, 0.513726 )
+border_width_top = 2
+border_width_bottom = 2
+border_color = Color( 0.0705882, 0.0705882, 0.0705882, 1 )
+border_blend = true
 
 [sub_resource type="StyleBoxFlat" id=6]
 bg_color = Color( 0.6, 0.6, 0.6, 0.584314 )
@@ -327,6 +334,33 @@ color_ramp = SubResource( 3 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource( 5 )
+
+[node name="Instructions" type="ScrollContainer" parent="."]
+anchor_bottom = 1.0
+margin_right = 236.0
+scroll_horizontal_enabled = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Template" type="Label" parent="Instructions"]
+visible = false
+margin_right = 236.0
+margin_bottom = 26.0
+size_flags_horizontal = 3
+custom_styles/normal = SubResource( 26 )
+text = "Move Left"
+align = 1
+valign = 1
+uppercase = true
+
+[node name="VBox" type="VBoxContainer" parent="Instructions"]
+margin_right = 236.0
+margin_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/separation = 0
+alignment = 1
 
 [node name="Controls" type="HBoxContainer" parent="."]
 anchor_right = 1.0
@@ -633,7 +667,7 @@ __meta__ = {
 [connection signal="file_selected" from="MapEditor/FileDialog" to="MapEditor" method="_on_FileDialog_file_selected"]
 [connection signal="pressed" from="ProgramWorkshop/File/Save" to="ProgramWorkshop" method="_on_Save_pressed"]
 [connection signal="pressed" from="ProgramWorkshop/File/Open" to="ProgramWorkshop" method="_on_Open_pressed"]
-[connection signal="pressed" from="ProgramWorkshop/Drawer" to="ProgramWorkshop" method="_on_Drawer_pressed"]
-[connection signal="pressed" from="ProgramWorkshop/Drawer" to="MapEditor" method="_on_Program_Drawer_pressed"]
 [connection signal="pressed" from="ProgramWorkshop/Drawer" to="." method="_on_Drawer_pressed"]
+[connection signal="pressed" from="ProgramWorkshop/Drawer" to="MapEditor" method="_on_Program_Drawer_pressed"]
+[connection signal="pressed" from="ProgramWorkshop/Drawer" to="ProgramWorkshop" method="_on_Drawer_pressed"]
 [connection signal="file_selected" from="ProgramWorkshop/FileDialog" to="ProgramWorkshop" method="_on_FileDialog_file_selected"]
