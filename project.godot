@@ -24,12 +24,17 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://program blocks/ProgramBlock.gd"
 }, {
+"base": "Spatial",
+"class": "Scriptable",
+"language": "GDScript",
+"path": "res://Scriptable.gd"
+}, {
 "base": "Node",
 "class": "State",
 "language": "GDScript",
 "path": "res://addons/node_fsm_plugin/state_node.gd"
 }, {
-"base": "StaticBody",
+"base": "Scriptable",
 "class": "Tile",
 "language": "GDScript",
 "path": "res://tiles/Tile.gd"
@@ -38,6 +43,7 @@ _global_script_class_icons={
 "ActionBlock": "",
 "FSM": "res://addons/node_fsm_plugin/fsm_icon.svg",
 "ProgramBlock": "",
+"Scriptable": "",
 "State": "res://addons/node_fsm_plugin/state_icon.svg",
 "Tile": ""
 }

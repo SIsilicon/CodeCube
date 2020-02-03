@@ -1,5 +1,5 @@
 tool
-extends StaticBody
+extends Scriptable
 class_name Tile
 
 enum Type {
@@ -80,4 +80,4 @@ func set_material_override(material : Material, node = self) -> void:
 		set_material_override(material, child)
 
 func set_colliding(value : bool) -> void:
-	collision_layer = int(value)
+	self.collision_layer = int(value)

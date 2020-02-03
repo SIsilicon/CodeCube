@@ -99,6 +99,7 @@ func _unhandled_input(event : InputEvent) -> void:
 						var new_tile := tile_to_add.duplicate()
 						new_tile.set_colliding(true)
 						new_tile.set_material_override(null)
+						new_tile.scale = Vector3(1, 1, 1)
 						new_tile.translation = point
 						if not _grid_map().tiles.has(point + Vector3.UP): # checking for wall
 							var other_tile = _grid_map().add_tile(new_tile, true)
@@ -260,6 +261,9 @@ func _on_Tile_button_pressed(tile_type : int) -> void:
 		tile_to_add.queue_free()
 		tile.translation = tile_to_add.translation
 	tile_to_add = tile
+	
+	if wall_mode:
+		tile_to_add.scale = Vector3(2,1,2)
 
 func _on_WallToggle_toggled(button_pressed : bool) -> void:
 	wall_mode = button_pressed

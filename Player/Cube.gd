@@ -1,13 +1,11 @@
-extends Spatial
+extends Scriptable
 
-signal read_instruction(line)
 signal finished_moving
 signal died
 
 export var manual_control := false
 
 var moving := false setget set_moving
-var executing := false
 
 var linear_velocity := Vector3()
 var tile : Tile
@@ -17,71 +15,35 @@ var face_state := 0 setget set_face_state
 onready var anim_player := $AnimationPlayer
 onready var tween := $Tween
 
-export var code := [
-	"move",
-	"move",
-	"turn left",
-	"jump",
-	"move"
-]
-
-var loop_stack := []
-
 var turn_direction : int
 
 func teleport(position) -> void:
 	tile = position
 	$FSM.go_to("teleport_end")
 
-func execute() -> void:
-	executing = true
-	
-	var line_num := 0
-	while executing:
-		var expression : String = code[line_num]
-		emit_signal("read_instruction", line_num)
-		match expression:
-			"move":
-				$FSM.go_to("rolling")
-				yield(self, "finished_moving")
-			"turn left":
-				turn_direction = 1
-				$FSM.go_to("turning")
-				yield(self, "finished_moving")
-			"turn right":
-				turn_direction = -1
-				$FSM.go_to("turning")
-				yield(self, "finished_moving")
-			"jump":
-				$FSM.go_to("jumping")
-				yield(self, "finished_moving")
-			"stop":
-				break
-			_:
-				if expression.find("loop count") != -1:
-					var count := int(expression.replace("loop count ", ""))
-					loop_stack.push_back([line_num, "count", 0, count])
-					yield(get_tree(), "idle_frame")
-					
-				elif expression == "loop end":
-					match loop_stack[-1][1]:
-						"count":
-							if loop_stack[-1][2] < loop_stack[-1][3] - 1:
-								line_num = loop_stack[-1][0]
-								loop_stack[-1][2] += 1
-							else:
-								loop_stack.pop_back()
-					yield(get_tree(), "idle_frame")
-					
-				else:
-					printerr("Runtime error! " + expression + " is not a valid command.")
-					return
-		
-		line_num += 1
-	
-	executing = false
+func custom_execute(expression : String) -> bool:
+	match expression:
+		"move":
+			$FSM.go_to("rolling")
+			yield(self, "finished_moving")
+		"turn left":
+			turn_direction = 1
+			$FSM.go_to("turning")
+			yield(self, "finished_moving")
+		"turn right":
+			turn_direction = -1
+			$FSM.go_to("turning")
+			yield(self, "finished_moving")
+		"jump":
+			$FSM.go_to("jumping")
+			yield(self, "finished_moving")
+		_:
+			return false
+	return true
 
 func _ready() -> void:
+	custom_insruction_set = funcref(self, "custom_execute")
+	
 	$Cube/Glow.material_override = $Cube/Glow.material_override.duplicate()
 	translation = translation.round()
 	rotation.y = stepify(rotation.y, PI/2)

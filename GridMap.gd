@@ -11,7 +11,7 @@ var spawn_tile : Tile
 
 func _ready():
 	load_level(save_file)
-	if get_parent().sandbox_mode:
+	if get_parent().sandbox_mode and not Engine.editor_hint:
 		$"../MapEditor".update_wall_data()
 
 func save_level(level : String) -> void:
