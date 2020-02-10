@@ -53,12 +53,12 @@ func _notification(what : int) -> void:
 		mouse_inside = false
 		get_stylebox("panel", "").bg_color = unselected_color
 
-func can_drop_data(position : Vector2, data) -> bool:
+func can_drop_data(_position : Vector2, data) -> bool:
 	return typeof(data) == TYPE_ARRAY and data.size() == 2 and \
 			data[0] is (get_script() as Script) and \
 			data[1] != bool(type)
 
-func drop_data(position : Vector2, data) -> void:
+func drop_data(_position : Vector2, _data) -> void:
 	block.link_handler.temp_socket_b = self
 
 func get_position() -> Vector2:

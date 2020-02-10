@@ -57,7 +57,7 @@ func load_level(level : String) -> void:
 	
 	file.open(level, File.READ)
 	
-	var version := file.get_8()
+	var _version := file.get_8()
 	var tile_num := file.get_32()
 	
 	var list_offset = 5
@@ -69,16 +69,16 @@ func load_level(level : String) -> void:
 		var tile := preload("res://tiles/Tile.tscn").instance()
 		tile.type = file.get_8()
 		tile.translation = Vector3(
-				_to_signed8(file.get_8()),
-				_to_signed8(file.get_8()),
-				_to_signed8(file.get_8())
+				Global.to_signed8(file.get_8()),
+				Global.to_signed8(file.get_8()),
+				Global.to_signed8(file.get_8())
 		)
 		
 		add_tile(tile)
 		if Engine.editor_hint and SHOW_TILES_IN_EDITOR:
 			tile.owner = get_parent()
 		if tile.is_wall:
-			tile.rotation_degrees.y = _to_signed8(file.get_8()) * 90
+			tile.rotation_degrees.y = Global.to_signed8(file.get_8()) * 90
 		
 		list_offset += 4
 	
@@ -119,8 +119,3 @@ func create_tile(type : int, pos : Vector3) -> StaticBody:
 	add_tile(tile)
 	
 	return tile
-
-func _to_signed8(val : int) -> int:
-	if val > 0x7F:
-		return -(~val & 0xFF) - 1
-	return val

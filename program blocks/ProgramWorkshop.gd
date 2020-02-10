@@ -1,9 +1,17 @@
 extends Control
 
-const PROG_VERSION = 1
+const PROG_VERSION = 2
 const SHOW_BLOCKS_IN_EDITOR = true
 
 export(String, FILE, "*.ccprogram") var program
+
+const builtin_blocks := [
+	"res://program blocks/Blocks/Misc Blocks/Start Block",
+	"res://program blocks/Blocks/Misc Blocks/Stop Block",
+	"res://program blocks/Blocks/Loop Blocks/Counter Loop Block",
+	"res://program blocks/Blocks/Loop Blocks/Loop End Block"
+]
+var specific_blocks := [] setget set_specific_blocks
 
 var zoom := 1.0
 var zoom_center := Vector2()
@@ -57,7 +65,7 @@ func _process(delta : float) -> void:
 	$LinkHandler.rect_scale = new_scale
 	$LinkHandler.rect_position = zoom_center + zoom_ratio * ($LinkHandler.rect_position - zoom_center)
 
-func can_drop_data(position : Vector2, data) -> bool:
+func can_drop_data(_position : Vector2, data) -> bool:
 	return data is ProgramBlock
 
 func drop_data(position : Vector2, data) -> void:
@@ -87,6 +95,7 @@ func interpret() -> int:
 	
 	return 3
 
+# warning-ignore:shadowed_variable
 func save_program(program : String) -> void:
 	var blocks : Array = $LinkHandler.get_blocks()
 	
@@ -105,7 +114,7 @@ func save_program(program : String) -> void:
 		file.store_16(block_offset)
 		file.seek(block_offset)
 		
-		var block_data := block.serialize()
+		var block_data := block.serialize(builtin_blocks + specific_blocks)
 		file.store_buffer(block_data)
 		block_offset += block_data.size()
 		
@@ -123,6 +132,7 @@ func save_program(program : String) -> void:
 	
 	file.close()
 
+# warning-ignore:shadowed_variable
 func load_program(program : String) -> void:
 	var file := File.new()
 	if not file.file_exists(program):
@@ -144,22 +154,34 @@ func load_program(program : String) -> void:
 		var block_offset := file.get_16()
 		file.seek(block_offset)
 		
-		var rect_pos := Vector2(
-				_to_signed_16(file.get_16()),
-				_to_signed_16(file.get_16())
-		)
-		var type := file.get_8()
+		var block : ProgramBlock
+		if version == 1:
+			var rect_pos := Vector2(
+					Global.to_signed16(file.get_16()),
+					Global.to_signed16(file.get_16())
+			)
+			var type := file.get_8()
+			
+			block = load(ProgramBlock.TYPES[type] + ".tscn").instance()
+			block.rect_position = rect_pos
+			
+			for socket in block.get_sockets():
+				socket.id = file.get_16()
+			
+			if type == ProgramBlock.Type.Turn:
+				block.set_direction(file.get_8())
+			elif type == ProgramBlock.Type.CounterLoop:
+				block.set_count(file.get_8())
+			$LinkHandler.add_block(block)
 		
-		var block = load(ProgramBlock.TYPES[type] + ".tscn").instance()
-		block.rect_position = rect_pos
-		for socket in block.get_sockets():
-			socket.id = file.get_16()
-		
-		if type == ProgramBlock.Type.Turn:
-			block.set_direction(file.get_8())
-		elif type == ProgramBlock.Type.CounterLoop:
-			block.set_count(file.get_8())
-		$LinkHandler.add_block(block)
+		elif version == 2:
+			var type := file.get_8()
+			var path = (builtin_blocks + specific_blocks)[type]
+			block = load(path + ".tscn").instance()
+			
+			block.deserialize(file)
+			
+			$LinkHandler.add_block(block)
 		
 		if Engine.editor_hint and SHOW_BLOCKS_IN_EDITOR:
 			block.owner = get_parent()
@@ -168,15 +190,19 @@ func load_program(program : String) -> void:
 	file.seek(link_offset)
 	var max_key := 0
 	var key := file.get_16()
+	
 	while key != 0xFFFF:
 		$LinkHandler.add_link(file.get_16(), file.get_16(), key)
-		
 		max_key = max(max_key, key)
 		key = file.get_16()
 		max_key = max(max_key, key)
 	
 	$LinkHandler.link_key = max_key + 1
 	file.close()
+
+func set_specific_blocks(value : Array) -> void:
+	specific_blocks = value
+	$ScrollContainer.update_list(specific_blocks + builtin_blocks)
 
 func _on_Drawer_pressed() -> void:
 	if expanded:
@@ -204,8 +230,3 @@ func _on_Open_pressed():
 		$FileDialog.mode = FileDialog.MODE_OPEN_FILE
 		$FileDialog.invalidate()
 		$FileDialog.popup_centered()
-
-func _to_signed_16(val : int) -> int:
-	if val > 0x7FFF:
-		return -(~val & 0xFFFF) - 1
-	return val

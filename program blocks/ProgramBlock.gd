@@ -58,7 +58,7 @@ func _ready():
 		unselected_color = stylebox.border_color
 		add_stylebox_override("panel", stylebox)
 
-func _process(delta : float) -> void:
+func _process(_delta : float) -> void:
 	if selected and get_stylebox("panel", ""):
 		get_stylebox("panel", "").border_color = Color.white
 		selected = false
@@ -78,7 +78,6 @@ func interpret() -> Array:
 		return []
 
 func set_link_handler(value : Control) -> void:
-	var prev_handler := link_handler
 	link_handler = value
 	
 	if link_handler and not is_connected("selected", link_handler, "_on_block_selected"):
@@ -102,14 +101,23 @@ func get_socket_link(socket : Panel) -> int:
 			return link_key
 	return -1
 
-func serialize() -> PoolByteArray:
+func serialize(blocks : Array) -> PoolByteArray:
 	var array := PoolByteArray()
+	array.append(blocks.find(get_script().resource_path.rstrip(".gd")))
 	array.append_array([int(rect_position.x), int(rect_position.x) >> 8])
 	array.append_array([int(rect_position.y), int(rect_position.y) >> 8])
-	array.append(TYPES.find(get_script().resource_path.rstrip(".gd")))
 	
 	for socket in get_sockets():
 		array.append_array([socket.id, socket.id >> 8])
 	
 	return array
 
+func deserialize(file : File) -> void:
+	var rect_pos := Vector2(
+			Global.to_signed16(file.get_16()),
+			Global.to_signed16(file.get_16())
+	)
+	rect_position = rect_pos
+	
+	for socket in get_sockets():
+		socket.id = file.get_16()

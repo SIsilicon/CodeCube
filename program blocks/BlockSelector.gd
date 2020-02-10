@@ -5,23 +5,18 @@ export var button_theme : Theme
 var button_group : ButtonGroup
 var blocks := {}
 
-func _ready():
-	var files : Array = get_dir_contents("res://program blocks/Blocks")[0]
+func update_list(block_paths : Array) -> void:
+	for button in $Margin/VBox.get_children():
+		button.queue_free()
 	
-	for file in files:
-		var name : String = file.get_file()
-		
-		if not name.ends_with(".tscn"):
-			continue
-		
-		name = name.replace(".tscn", "")
-		var block : PackedScene = load(file)
-		blocks[name] = block
+	for file in block_paths:
+		var block : PackedScene = load(file + ".tscn")
+		blocks[file.get_file()] = block
 		
 		var button := Button.new()
-		button.icon = load(file.replace(".tscn", ".svg"))
+		button.icon = load(file + ".svg")
 		button.group = button_group
-		button.text = name
+		button.text = file.get_file()
 		button.focus_mode = Control.FOCUS_NONE
 		button.enabled_focus_mode = Control.FOCUS_NONE
 		button.theme = button_theme

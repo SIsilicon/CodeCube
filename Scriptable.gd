@@ -10,11 +10,12 @@ var line_num := 0
 var loop_stack := []
 
 var custom_insruction_set : FuncRef setget set_custom_instruction_set
+var custom_blocks := []
 
 func execute() -> void:
 	executing = true
 	
-	var line_num := 0
+	line_num = 0
 	while executing:
 		var expression : String = code[line_num]
 		emit_signal("read_instruction", line_num)
@@ -29,6 +30,7 @@ func execute() -> void:
 		if not custom_executed:
 			if expression == "stop":
 				break
+			
 			elif expression.find("loop count") != -1:
 				var count := int(expression.replace("loop count ", ""))
 				loop_stack.push_back([line_num, "count", 0, count])

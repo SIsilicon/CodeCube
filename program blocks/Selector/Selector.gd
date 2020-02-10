@@ -17,7 +17,7 @@ func set_selection(block : ProgramBlock) -> void:
 func clear_selection() -> void:
 	selected_blocks.resize(0)
 
-func _process(delta : float) -> void:
+func _process(_delta : float) -> void:
 	visible = false
 	if selected_blocks.size() > 0:
 		var rect : Rect2

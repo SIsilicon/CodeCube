@@ -27,10 +27,14 @@ func interpret() -> Array:
 func set_direction(dir : int) -> void:
 	$Option.selected = dir
 
-func serialize() -> PoolByteArray:
-	var array := .serialize()
+func serialize(blocks : Array) -> PoolByteArray:
+	var array := .serialize(blocks)
 	array.append($Option.selected)
 	return array
+
+func deserialize(file : File) -> void:
+	.deserialize(file)
+	set_direction(file.get_8())
 
 func _on_action_selected(ID : int) -> void:
 	match ID:

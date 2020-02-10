@@ -63,6 +63,8 @@ Global="*res://Global.gd"
 [debug]
 
 settings/fps/force_fps=30
+gdscript/warnings/narrowing_conversion=false
+gdscript/warnings/return_value_discarded=false
 
 [display]
 

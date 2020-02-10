@@ -88,7 +88,7 @@ func _input(event : InputEvent) -> void:
 		
 		renderer.cut_line.append(event.position)
 
-func _process(delta : float) -> void:
+func _process(_delta : float) -> void:
 	renderer = $LinkRenderer
 	
 	renderer.dragging_link = dragging_link

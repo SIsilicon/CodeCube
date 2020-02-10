@@ -5,21 +5,15 @@ signal died
 
 export var manual_control := false
 
-var moving := false setget set_moving
-
-var linear_velocity := Vector3()
-var tile : Tile
-
-var face_state := 0 setget set_face_state
-
 onready var anim_player := $AnimationPlayer
 onready var tween := $Tween
 
-var turn_direction : int
+var moving := false setget set_moving
 
-func teleport(position) -> void:
-	tile = position
-	$FSM.go_to("teleport_end")
+var linear_velocity := Vector3()
+var turn_direction : int
+var face_state := 0 setget set_face_state
+var tile : Tile
 
 func custom_execute(expression : String) -> bool:
 	match expression:
@@ -43,6 +37,11 @@ func custom_execute(expression : String) -> bool:
 
 func _ready() -> void:
 	custom_insruction_set = funcref(self, "custom_execute")
+	custom_blocks = [
+		"res://program blocks/Blocks/Action Blocks/Jump Block",
+		"res://program blocks/Blocks/Action Blocks/Move Block",
+		"res://program blocks/Blocks/Action Blocks/Turn Block"
+	]
 	
 	$Cube/Glow.material_override = $Cube/Glow.material_override.duplicate()
 	translation = translation.round()
@@ -84,6 +83,10 @@ func hide_loading_icon() -> void:
 	$LoadingIcon.hide()
 	$LoadingIcon/AnimationPlayer.stop()
 
+func teleport(position) -> void:
+	tile = position
+	$FSM.go_to("teleport_end")
+
 func die() -> void:
 	var explosion : Spatial = preload("res://particle systems/Explode.tscn").instance()
 	explosion.translation = $Cube.global_transform.origin
@@ -107,6 +110,7 @@ func play_anim(anim : String) -> void:
 func floor_position() -> Vector3:
 	return translation * Vector3(1, 0, 1)
 
+# warning-ignore:unused_argument
 func get_tile(position : Vector3) -> Tile:
 	if $FSM.active_state in ["jumping", "falling"]:
 		$FloorCast.translation = Vector3(0, 0.4, 0)
@@ -133,6 +137,7 @@ func check_wall(dir : float) -> bool:
 	return false
 
 func check_tile() -> void:
+	# warning-ignore:shadowed_variable
 	var tile := get_tile(floor_position())
 	
 	if tile == null:

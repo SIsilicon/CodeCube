@@ -61,5 +61,5 @@ func _draw() -> void:
 	if cut_line.size() > 1:
 		draw_polyline(cut_line, Color.red, 1.2, true)
 
-func _process(delta : float) -> void:
+func _process(_delta : float) -> void:
 	update()

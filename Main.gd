@@ -35,7 +35,7 @@ func _unhandled_input(event : InputEvent) -> void:
 		if event is InputEventMouseMotion and dragging:
 			drag_offset += event.relative * 0.01 * drag_speed
 
-func _process(delta : float) -> void:
+func _process(_delta : float) -> void:
 	if cube_exists():
 		var new_cam_trans := Transform().translated(Vector3(0, 6, -4) * zoom)
 		var target := cube.translation
@@ -66,6 +66,8 @@ func spawn_cube() -> void:
 	cube.connect("died", self, "_on_Cube_died")
 	cube.connect("read_instruction", self, "_on_instruction_read")
 	cube_died = false
+	
+	$ProgramWorkshop.specific_blocks = cube.custom_blocks
 
 func pause_node(node : Node, paused : bool) -> void:
 	node.set_process(!paused)

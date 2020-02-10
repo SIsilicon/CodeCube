@@ -20,7 +20,11 @@ func interpret() -> Array:
 func set_count(value : int) -> void:
 	$SpinBox.value = value
 
-func serialize() -> PoolByteArray:
-	var array := .serialize()
+func serialize(blocks : Array) -> PoolByteArray:
+	var array := .serialize(blocks)
 	array.append($SpinBox.value)
 	return array
+
+func deserialize(file : File) -> void:
+	.deserialize(file)
+	set_count(file.get_8())

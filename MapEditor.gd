@@ -150,7 +150,7 @@ func _input(event : InputEvent) -> void:
 		undo_redo.redo()
 		accept_event()
 
-func _process(delta : float) -> void:
+func _process(_delta : float) -> void:
 	if debug_walls:
 		debug_walls.clear()
 		debug_walls.begin(Mesh.PRIMITIVE_POINTS)
@@ -163,6 +163,7 @@ func place_wall(pos : Vector3, erase : bool, set_undo_redo := false) -> void:
 	
 	if not erase:
 		for i in range(0, 4):
+			# warning-ignore:integer_division
 			var tile_pos := Vector3(i % 2 - 1, 0.0, i / 2 - 1)
 			tile_pos += pos
 			if _grid_map().tiles.has(tile_pos):
@@ -236,6 +237,7 @@ func update_wall_data() -> void:
 			points[2] = tile.type in [Type.Wall, Type.WallEdge, Type.WallInvCorner]
 			points[3] = tile.type in [Type.Wall, Type.WallEdge, Type.WallCorner, Type.WallInvCorner, Type.WallPinch]
 			
+# warning-ignore:unused_variable
 			for i in range(tile.rotation_degrees.y / 90):
 				var val = points.pop_back()
 				points.push_front(val)
