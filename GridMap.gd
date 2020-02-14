@@ -9,45 +9,54 @@ export(String, FILE, GLOBAL, "*.cclevel") var save_file
 var tiles := {}
 var spawn_tile : Tile
 
-func _ready():
-	load_level(save_file)
+func _ready() -> void:
+	load_level_json(save_file)
 	if get_parent().sandbox_mode and not Engine.editor_hint:
 		$"../MapEditor".update_wall_data()
 
-func save_level(level : String) -> void:
+func start_tile_codes() -> void:
+	for tile in tiles.values():
+		if tile.program:
+			tile.program.interpret()
+			tile.execute()
+
+func save_level_json(level : String) -> void:
 	if weakref(spawn_tile).get_ref() == null:
 		get_parent().show_error_msg("You need a spawn tile!")
 		return
 	
 	var file := File.new()
 	file.open(level, File.WRITE)
-	file.store_8(LVL_VERSION)
-	file.store_32(tiles.size())
 	
-	var list_offset = 5 # offset from stored values above.
-	var list_size = tiles.size() * 4 # size of list
+	var map_dict := {
+		version = LVL_VERSION,
+		tiles = [],
+		programs = []
+	}
+	var programs := []
 	
-	var tile_offset = list_offset + list_size
-	for i in tiles.size():
-		var tile : Tile = tiles.values()[i]
-		
-		file.store_32(tile_offset)
-		file.seek(tile_offset)
-		
-		file.store_8(tile.type)
-		file.store_8(tile.translation.x)
-		file.store_8(tile.translation.y)
-		file.store_8(tile.translation.z)
-		tile_offset += 4
+	for tile in tiles.values():
+		var tile_dict := {
+			type = tile.type,
+			pos = tile.translation,
+		}
+		if tile.program:
+			if not programs.has(tile.program):
+				programs.append(tile.program)
+			tile_dict.program = programs.find(tile.program)
 		
 		if tile.is_wall:
-			file.store_8(tile.rotation_degrees.y / 90)
-			tile_offset += 1
+			tile_dict.rotation = tile.rotation_degrees.y / 90
 		
-		file.seek(list_offset + (i + 1) * 4)
-	file.close()
+		map_dict.tiles.append(tile_dict)
+	
+	for program in programs:
+		var program_json := CCProgramSaverLoader.save_as_json(program)
+		map_dict.programs.append(program_json)
+	
+	file.store_line(Global.jsonify(map_dict))
 
-func load_level(level : String) -> void:
+func load_level_json(level : String) -> void:
 	var file := File.new()
 	if not file.file_exists(level):
 		return
@@ -56,33 +65,26 @@ func load_level(level : String) -> void:
 		remove_tile(tiles[pos])
 	
 	file.open(level, File.READ)
+	var map_dict : Dictionary = Global.godotify(file.get_line())
 	
-	var _version := file.get_8()
-	var tile_num := file.get_32()
+	var programs := []
+	for program_json in map_dict.programs:
+		var program := CCProgramSaverLoader.load_from_json(program_json)
+		programs.append(program)
 	
-	var list_offset = 5
-	for i in tile_num:
-		file.seek(list_offset)
-		var tile_offset := file.get_32()
-		file.seek(tile_offset)
-		
+	for tile_dict in map_dict.tiles:
 		var tile := preload("res://tiles/Tile.tscn").instance()
-		tile.type = file.get_8()
-		tile.translation = Vector3(
-				Global.to_signed8(file.get_8()),
-				Global.to_signed8(file.get_8()),
-				Global.to_signed8(file.get_8())
-		)
+		tile.type = tile_dict.type
+		tile.translation = tile_dict.pos
+		if tile_dict.has("program"):
+			tile.program = programs[tile_dict.program]
+		if tile_dict.has("rotation"):
+			tile.rotation_degrees.y = tile_dict.rotation * 90
 		
 		add_tile(tile)
+		
 		if Engine.editor_hint and SHOW_TILES_IN_EDITOR:
 			tile.owner = get_parent()
-		if tile.is_wall:
-			tile.rotation_degrees.y = Global.to_signed8(file.get_8()) * 90
-		
-		list_offset += 4
-	
-	file.close()
 
 func remove_tile(tile : Tile, delete := true) -> void:
 	remove_child(tile)

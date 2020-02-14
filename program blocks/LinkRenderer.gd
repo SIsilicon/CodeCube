@@ -14,9 +14,13 @@ func _draw() -> void:
 	var points := []
 	var vectors := []
 	
-	for link in get_parent().links:
-		var socket_a : Panel = get_parent().get_socket(link, false)
-		var socket_b : Panel = get_parent().get_socket(link, true)
+	var program : CCProgram = get_node("../..").program
+	if not program:
+		return
+	
+	for link in program.links:
+		var socket_a : Panel = program.get_socket(link, false)
+		var socket_b : Panel = program.get_socket(link, true)
 		
 		var point_a : Vector2 = socket_a.get_position()
 		var point_b : Vector2 = socket_b.get_position()

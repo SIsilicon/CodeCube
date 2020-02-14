@@ -14,10 +14,20 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://program blocks/Blocks/Action Blocks/Action Block.gd"
 }, {
+"base": "Resource",
+"class": "CCProgram",
+"language": "GDScript",
+"path": "res://program resource/CCProgram.gd"
+}, {
 "base": "Node",
 "class": "FSM",
 "language": "GDScript",
 "path": "res://addons/node_fsm_plugin/fsm_node.gd"
+}, {
+"base": "ProgramBlock",
+"class": "LoopBlock",
+"language": "GDScript",
+"path": "res://program blocks/Blocks/Loop Blocks/Loop Block.gd"
 }, {
 "base": "Panel",
 "class": "ProgramBlock",
@@ -41,7 +51,9 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 "ActionBlock": "",
+"CCProgram": "",
 "FSM": "res://addons/node_fsm_plugin/fsm_icon.svg",
+"LoopBlock": "",
 "ProgramBlock": "",
 "Scriptable": "",
 "State": "res://addons/node_fsm_plugin/state_icon.svg",
@@ -59,6 +71,7 @@ config/icon="res://icon.png"
 [autoload]
 
 Global="*res://Global.gd"
+CCProgramSaverLoader="*res://program resource/CCProgramSaverLoader.gd"
 
 [debug]
 
@@ -86,7 +99,8 @@ singletons=[  ]
 [gui]
 
 theme/use_hidpi=true
-theme/custom_font="res://fonts/Noto Sans UI/NotoSansUI.tres"
+theme/custom="res://assets/main_gui_style.theme"
+theme/custom_font="res://assets/fonts/Noto Sans UI/NotoSansUI.tres"
 
 [importer_defaults]
 

@@ -27,6 +27,7 @@ var pressed := false
 var dragged := false
 onready var pre_drag_position := rect_position
 
+var program setget set_program
 var link_handler : Control setget set_link_handler
 var link_keys := []
 
@@ -65,10 +66,10 @@ func _process(_delta : float) -> void:
 	else:
 		get_stylebox("panel", "").border_color = unselected_color
 
-func _exit_tree() -> void:
-	if link_handler:
+func _notification(what : int) -> void:
+	if what == NOTIFICATION_PREDELETE and program:
 		for socket in get_sockets():
-			link_handler.unregister_socket(socket)
+			program.unregister_socket(socket)
 
 func interpret() -> Array:
 	if visited:
@@ -77,16 +78,18 @@ func interpret() -> Array:
 		visited = true
 		return []
 
+func set_program(value) -> void:
+	program = value
+	
+	for socket in get_sockets():
+		if program:
+			program.register_socket(socket)
+
 func set_link_handler(value : Control) -> void:
 	link_handler = value
-	
 	if link_handler and not is_connected("selected", link_handler, "_on_block_selected"):
 		connect("selected", link_handler, "_on_block_selected", [self])
 		connect("dragged", link_handler.selector, "_on_block_dragged", [self])
-	
-	for socket in get_sockets():
-		if link_handler:
-			link_handler.register_socket(socket)
 
 func get_sockets() -> Array:
 	var sockets := []
@@ -97,27 +100,23 @@ func get_sockets() -> Array:
 
 func get_socket_link(socket : Panel) -> int:
 	for link_key in link_keys:
-		if link_handler.get_socket(link_key, false) == socket:
+		if program.get_socket(link_key, false) == socket:
 			return link_key
 	return -1
 
-func serialize(blocks : Array) -> PoolByteArray:
-	var array := PoolByteArray()
-	array.append(blocks.find(get_script().resource_path.rstrip(".gd")))
-	array.append_array([int(rect_position.x), int(rect_position.x) >> 8])
-	array.append_array([int(rect_position.y), int(rect_position.y) >> 8])
+func serialize(blocks : Array) -> Dictionary:
+	var dict := {
+		type = blocks.find(get_script().resource_path.rstrip(".gd")),
+		pos = rect_position,
+		sockets = []
+	}
 	
 	for socket in get_sockets():
-		array.append_array([socket.id, socket.id >> 8])
+		dict.sockets.append(socket.id)
 	
-	return array
+	return dict
 
-func deserialize(file : File) -> void:
-	var rect_pos := Vector2(
-			Global.to_signed16(file.get_16()),
-			Global.to_signed16(file.get_16())
-	)
-	rect_position = rect_pos
-	
-	for socket in get_sockets():
-		socket.id = file.get_16()
+func deserialize(dict : Dictionary) -> void:
+	rect_position = dict.pos
+	for i in get_sockets().size():
+		get_sockets()[i].id = dict.sockets[i]

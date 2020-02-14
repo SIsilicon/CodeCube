@@ -37,11 +37,6 @@ func custom_execute(expression : String) -> bool:
 
 func _ready() -> void:
 	custom_insruction_set = funcref(self, "custom_execute")
-	custom_blocks = [
-		"res://program blocks/Blocks/Action Blocks/Jump Block",
-		"res://program blocks/Blocks/Action Blocks/Move Block",
-		"res://program blocks/Blocks/Action Blocks/Turn Block"
-	]
 	
 	$Cube/Glow.material_override = $Cube/Glow.material_override.duplicate()
 	translation = translation.round()
@@ -85,6 +80,7 @@ func hide_loading_icon() -> void:
 
 func teleport(position) -> void:
 	tile = position
+	print(tile)
 	$FSM.go_to("teleport_end")
 
 func die() -> void:
@@ -110,8 +106,7 @@ func play_anim(anim : String) -> void:
 func floor_position() -> Vector3:
 	return translation * Vector3(1, 0, 1)
 
-# warning-ignore:unused_argument
-func get_tile(position : Vector3) -> Tile:
+func get_tile() -> Tile:
 	if $FSM.active_state in ["jumping", "falling"]:
 		$FloorCast.translation = Vector3(0, 0.4, 0)
 	else:
@@ -138,7 +133,7 @@ func check_wall(dir : float) -> bool:
 
 func check_tile() -> void:
 	# warning-ignore:shadowed_variable
-	var tile := get_tile(floor_position())
+	var tile := get_tile()
 	
 	if tile == null:
 		if $FSM.active_state != "jumping":

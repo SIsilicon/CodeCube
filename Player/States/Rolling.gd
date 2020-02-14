@@ -12,6 +12,7 @@ func on_enter(cube) -> void:
 	else:
 		cube.linear_velocity = cube.get_dir() / 0.43
 		cube.play_anim("Cube-roll")
+	cube.linear_velocity += cube.get_tile().linear_velocity
 	
 	cube.tween.interpolate_callback(cube, 0.4, "check_tile")
 	cube.tween.start()

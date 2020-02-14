@@ -13,8 +13,10 @@ func update_list(block_paths : Array) -> void:
 		var block : PackedScene = load(file + ".tscn")
 		blocks[file.get_file()] = block
 		
+		var inst := block.instance()
+		
 		var button := Button.new()
-		button.icon = load(file + ".svg")
+		button.icon = inst.icon
 		button.group = button_group
 		button.text = file.get_file()
 		button.focus_mode = Control.FOCUS_NONE
@@ -23,6 +25,8 @@ func update_list(block_paths : Array) -> void:
 		button.rect_min_size.y = 40
 		$Margin/VBox.add_child(button)
 		button.connect("button_down", self, "_element_pressed", [button])
+		
+		inst.queue_free()
 
 func _element_pressed(button : Button) -> void:
 	var block : ProgramBlock = blocks[button.text].instance()

@@ -3,15 +3,7 @@ extends Control
 const PROG_VERSION = 2
 const SHOW_BLOCKS_IN_EDITOR = true
 
-export(String, FILE, "*.ccprogram") var program
-
-const builtin_blocks := [
-	"res://program blocks/Blocks/Misc Blocks/Start Block",
-	"res://program blocks/Blocks/Misc Blocks/Stop Block",
-	"res://program blocks/Blocks/Loop Blocks/Counter Loop Block",
-	"res://program blocks/Blocks/Loop Blocks/Loop End Block"
-]
-var specific_blocks := [] setget set_specific_blocks
+var program := CCProgram.new() setget set_program
 
 var zoom := 1.0
 var zoom_center := Vector2()
@@ -25,7 +17,6 @@ var code := []
 func _ready() -> void:
 	if not expanded:
 		rect_position.x = -rect_size.x
-	load_program(program)
 
 func _gui_input(event : InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -64,6 +55,9 @@ func _process(delta : float) -> void:
 	var zoom_ratio = new_scale / $LinkHandler.rect_scale
 	$LinkHandler.rect_scale = new_scale
 	$LinkHandler.rect_position = zoom_center + zoom_ratio * ($LinkHandler.rect_position - zoom_center)
+	
+	material.set_shader_param("zoom", new_scale.x)
+	material.set_shader_param("offset", $LinkHandler.rect_position)
 
 func can_drop_data(_position : Vector2, data) -> bool:
 	return data is ProgramBlock
@@ -77,132 +71,26 @@ func drop_data(position : Vector2, data) -> void:
 	undo_redo.commit_action()
 	block.rect_position = $LinkHandler.get_transform().affine_inverse().xform(position)
 
-func interpret() -> int:
-	for block in $LinkHandler.get_blocks():
-		if block is preload("Blocks/Misc Blocks/Start Block.gd"):
-			code = block.interpret()
-			for b in $LinkHandler.get_blocks():
-				b.visited = false
-			
-			if code.size() == 0:
-				return 1
-			elif code[0] == "already visited":
-				return 4
-			elif code[-1] != "stop":
-				return 2
-			else:
-				return 0
+func set_program(value : CCProgram) -> void:
+	for child in $LinkHandler.get_children():
+		if child is ProgramBlock:
+			$LinkHandler.remove_child(child)
 	
-	return 3
-
-# warning-ignore:shadowed_variable
-func save_program(program : String) -> void:
-	var blocks : Array = $LinkHandler.get_blocks()
+	program = value
 	
-	var file := File.new()
-	file.open(program, File.WRITE)
-	file.store_8(PROG_VERSION)
-	file.store_16(blocks.size())
-	file.store_32(0) # placeholder for link list offset
-	
-	var list_offset = 7 # offset from stored values above.
-	var list_size = blocks.size() * 2 # size of list (2 bytes per element)
-	
-	var block_offset = list_offset + list_size
-	for i in blocks.size():
-		var block : ProgramBlock = blocks[i]
-		file.store_16(block_offset)
-		file.seek(block_offset)
+	if program:
+		program.set_link_handler($LinkHandler)
+		$ScrollContainer.update_list(program.available_blocks)
+		$GetProgram.hide()
 		
-		var block_data := block.serialize(builtin_blocks + specific_blocks)
-		file.store_buffer(block_data)
-		block_offset += block_data.size()
+		if not $"..".sandbox_mode:
+			$"..".cube_program = program
+			$"..".cube.program = program
+		else:
+			$"../MapEditor".selected_tile.program = program
 		
-		file.seek(list_offset + (i + 1) * 2)
-	
-	file.seek(3) # Link list offset
-	file.store_32(block_offset)
-	file.seek(block_offset)
-	
-	for link in $LinkHandler.links:
-		file.store_16(link)
-		file.store_16($LinkHandler.links[link][0])
-		file.store_16($LinkHandler.links[link][1])
-	file.store_16(0xFFFF) # marks end of list
-	
-	file.close()
-
-# warning-ignore:shadowed_variable
-func load_program(program : String) -> void:
-	var file := File.new()
-	if not file.file_exists(program):
-		return
-	
-	for block in $LinkHandler.get_blocks():
-		$LinkHandler.remove_child(block)
-		block.queue_free()
-	
-	file.open(program, File.READ)
-	
-	var version := file.get_8()
-	var block_num := file.get_16()
-	var link_offset := file.get_32()
-	
-	var list_offset = 7
-	for i in block_num:
-		file.seek(list_offset)
-		var block_offset := file.get_16()
-		file.seek(block_offset)
-		
-		var block : ProgramBlock
-		if version == 1:
-			var rect_pos := Vector2(
-					Global.to_signed16(file.get_16()),
-					Global.to_signed16(file.get_16())
-			)
-			var type := file.get_8()
-			
-			block = load(ProgramBlock.TYPES[type] + ".tscn").instance()
-			block.rect_position = rect_pos
-			
-			for socket in block.get_sockets():
-				socket.id = file.get_16()
-			
-			if type == ProgramBlock.Type.Turn:
-				block.set_direction(file.get_8())
-			elif type == ProgramBlock.Type.CounterLoop:
-				block.set_count(file.get_8())
-			$LinkHandler.add_block(block)
-		
-		elif version == 2:
-			var type := file.get_8()
-			var path = (builtin_blocks + specific_blocks)[type]
-			block = load(path + ".tscn").instance()
-			
-			block.deserialize(file)
-			
-			$LinkHandler.add_block(block)
-		
-		if Engine.editor_hint and SHOW_BLOCKS_IN_EDITOR:
-			block.owner = get_parent()
-		list_offset += 2
-	
-	file.seek(link_offset)
-	var max_key := 0
-	var key := file.get_16()
-	
-	while key != 0xFFFF:
-		$LinkHandler.add_link(file.get_16(), file.get_16(), key)
-		max_key = max(max_key, key)
-		key = file.get_16()
-		max_key = max(max_key, key)
-	
-	$LinkHandler.link_key = max_key + 1
-	file.close()
-
-func set_specific_blocks(value : Array) -> void:
-	specific_blocks = value
-	$ScrollContainer.update_list(specific_blocks + builtin_blocks)
+	else:
+		$GetProgram.show()
 
 func _on_Drawer_pressed() -> void:
 	if expanded:
@@ -214,9 +102,9 @@ func _on_Drawer_pressed() -> void:
 
 func _on_FileDialog_file_selected(path : String) -> void:
 	if $FileDialog.mode == FileDialog.MODE_SAVE_FILE:
-		save_program(path)
+		CCProgramSaverLoader.save(path, program)
 	elif $FileDialog.mode == FileDialog.MODE_OPEN_FILE:
-		load_program(path)
+		self.program = CCProgramSaverLoader.load(path)
 		undo_redo.clear_history()
 
 func _on_Save_pressed():
@@ -230,3 +118,7 @@ func _on_Open_pressed():
 		$FileDialog.mode = FileDialog.MODE_OPEN_FILE
 		$FileDialog.invalidate()
 		$FileDialog.popup_centered()
+
+# Creates a tile program. Keep that in mind!
+func _on_Create_Program_pressed():
+	self.program = CCProgram.new(CCProgram.Type.TILE)

@@ -1,18 +1,18 @@
 [gd_scene load_steps=20 format=2]
 
-[ext_resource path="res://Player/cube.glb" type="PackedScene" id=1]
-[ext_resource path="res://Player/Cube.gd" type="Script" id=2]
-[ext_resource path="res://addons/node_fsm_plugin/fsm_node.gd" type="Script" id=3]
-[ext_resource path="res://Player/States/Idle.gd" type="Script" id=4]
-[ext_resource path="res://Player/States/Rolling.gd" type="Script" id=5]
-[ext_resource path="res://Player/States/Turning.gd" type="Script" id=6]
-[ext_resource path="res://Player/States/Falling.gd" type="Script" id=7]
-[ext_resource path="res://Player/States/Jumping.gd" type="Script" id=8]
-[ext_resource path="res://Player/States/Teleport End.gd" type="Script" id=9]
-[ext_resource path="res://Player/States/Teleport Begin.gd" type="Script" id=10]
-[ext_resource path="res://Player/interpreting.svg" type="Texture" id=11]
-[ext_resource path="res://Player/cube/primary-col.material" type="Material" id=12]
-[ext_resource path="res://Player/cube/secondary-col.material" type="Material" id=13]
+[ext_resource path="res://assets/cube/cube.glb" type="PackedScene" id=1]
+[ext_resource path="res://player/Cube.gd" type="Script" id=2]
+[ext_resource path="res://assets/cube/secondary-col.material" type="Material" id=3]
+[ext_resource path="res://player/States/Falling.gd" type="Script" id=4]
+[ext_resource path="res://player/States/Rolling.gd" type="Script" id=5]
+[ext_resource path="res://player/States/Turning.gd" type="Script" id=6]
+[ext_resource path="res://assets/cube/primary-col.material" type="Material" id=7]
+[ext_resource path="res://addons/node_fsm_plugin/fsm_node.gd" type="Script" id=8]
+[ext_resource path="res://player/States/Idle.gd" type="Script" id=9]
+[ext_resource path="res://player/States/Jumping.gd" type="Script" id=10]
+[ext_resource path="res://player/States/Teleport End.gd" type="Script" id=11]
+[ext_resource path="res://player/States/Teleport Begin.gd" type="Script" id=12]
+[ext_resource path="res://assets/interpreting.svg" type="Texture" id=13]
 
 [sub_resource type="SpatialMaterial" id=1]
 flags_transparent = true
@@ -36,7 +36,7 @@ surfaces/0 = {
 "blend_shape_data": [  ],
 "format": 97303,
 "index_count": 0,
-"material": ExtResource( 12 ),
+"material": ExtResource( 7 ),
 "primitive": 4,
 "skeleton_aabb": [  ],
 "vertex_count": 36
@@ -48,7 +48,7 @@ surfaces/1 = {
 "blend_shape_data": [  ],
 "format": 97303,
 "index_count": 0,
-"material": ExtResource( 13 ),
+"material": ExtResource( 3 ),
 "primitive": 4,
 "skeleton_aabb": [  ],
 "vertex_count": 288
@@ -59,7 +59,7 @@ extents = Vector3( 0.488822, 0.518143, 0.506891 )
 
 [sub_resource type="Shader" id=4]
 code = "shader_type spatial;
-render_mode blend_mix, depth_draw_alpha_prepass, unshaded;
+render_mode blend_mix, cull_disabled, depth_draw_alpha_prepass, unshaded;
 
 const float PI = 3.141592653;
 
@@ -99,7 +99,7 @@ void fragment() {
 shader = SubResource( 4 )
 shader_param/uv_rotation = 0.0
 shader_param/alpha_scissor_threshold = 0.58
-shader_param/texture_albedo = ExtResource( 11 )
+shader_param/texture_albedo = ExtResource( 13 )
 
 [sub_resource type="Animation" id=6]
 loop = true
@@ -118,6 +118,7 @@ tracks/0/keys = {
 }
 
 [node name="Cube" instance=ExtResource( 1 )]
+pause_mode = 1
 collision_layer = 1024
 collision_mask = 3
 script = ExtResource( 2 )
@@ -133,12 +134,12 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.509523, 0 )
 shape = SubResource( 3 )
 
 [node name="LoadingIcon" type="Sprite3D" parent="." index="3"]
-transform = Transform( 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1.444, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.444, 0 )
 visible = false
 material_override = SubResource( 5 )
 pixel_size = 0.0022
 billboard = 1
-texture = ExtResource( 11 )
+texture = ExtResource( 13 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="LoadingIcon" index="0"]
 playback_speed = 2.0
@@ -171,12 +172,12 @@ __meta__ = {
 [node name="Tween" type="Tween" parent="." index="8"]
 
 [node name="FSM" type="Node" parent="." index="9"]
-script = ExtResource( 3 )
+script = ExtResource( 8 )
 initial_state = "idle"
 target = NodePath("..")
 
 [node name="Idle" type="Node" parent="FSM" index="0"]
-script = ExtResource( 4 )
+script = ExtResource( 9 )
 state_name = "idle"
 
 [node name="Rolling" type="Node" parent="FSM" index="1"]
@@ -188,18 +189,18 @@ script = ExtResource( 6 )
 state_name = "turning"
 
 [node name="Falling" type="Node" parent="FSM" index="3"]
-script = ExtResource( 7 )
+script = ExtResource( 4 )
 state_name = "falling"
 
 [node name="Jumping" type="Node" parent="FSM" index="4"]
-script = ExtResource( 8 )
+script = ExtResource( 10 )
 state_name = "jumping"
 
 [node name="Teleport End" type="Node" parent="FSM" index="5"]
-script = ExtResource( 9 )
+script = ExtResource( 11 )
 state_name = "teleport_end"
 
 [node name="Teleport Begin" type="Node" parent="FSM" index="6"]
-script = ExtResource( 10 )
+script = ExtResource( 12 )
 state_name = "teleport_begin"
 [connection signal="timeout" from="Blink" to="." method="_on_Blink_timeout"]

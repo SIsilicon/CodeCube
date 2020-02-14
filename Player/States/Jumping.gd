@@ -12,6 +12,7 @@ func on_enter(cube) -> void:
 		cube.play_anim("Cube-jump-roll")
 		cube.linear_velocity = cube.get_dir() * 4.0
 		cube.linear_velocity.y = 15.0
+		cube.linear_velocity += cube.get_tile().linear_velocity
 	
 	cube.face_state = 2
 

@@ -1,6 +1,7 @@
 extends State
 
 func on_enter(cube) -> void:
+	cube.get_tile()
 	cube.linear_velocity = Vector3()
 	
 	if cube.tween:
