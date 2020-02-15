@@ -1,0 +1,125 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://program blocks/Blocks/Loop Blocks/Counter Block.gd" type="Script" id=1]
+[ext_resource path="res://program blocks/Socket.tscn" type="PackedScene" id=2]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.756863, 0.823529, 0.176471, 0.65098 )
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color( 0.278431, 0.282353, 0.0313726, 1 )
+corner_radius_top_left = 61
+corner_radius_top_right = 61
+corner_radius_bottom_right = 61
+corner_radius_bottom_left = 61
+corner_detail = 1
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.137255, 0.137255, 0.137255, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0.137255, 0.137255, 0.137255, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0.137255, 0.137255, 0.137255, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[node name="CounterBlock" type="Panel"]
+margin_left = -146.193
+margin_top = -36.3699
+margin_right = 154.807
+margin_bottom = 38.6301
+custom_styles/panel = SubResource( 1 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -109.85
+margin_top = -11.0
+margin_right = -29.8496
+margin_bottom = -7.0
+text = "Counter"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SpinBox" type="SpinBox" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -19.9995
+margin_top = -21.8843
+margin_right = 128.0
+margin_bottom = 20.1157
+min_value = 1.0
+value = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Inflow" parent="." instance=ExtResource( 2 )]
+anchor_top = 0.0
+anchor_bottom = 0.0
+margin_left = -8.0
+margin_top = -8.0
+margin_right = 8.0
+margin_bottom = 8.0
+rect_rotation = -180.0
+custom_styles/panel = SubResource( 2 )
+
+[node name="LoopBack" parent="." instance=ExtResource( 2 )]
+anchor_left = 0.009
+anchor_top = 0.501
+anchor_right = 0.009
+anchor_bottom = 0.501
+margin_left = -8.01628
+margin_top = -7.97655
+margin_right = 7.98371
+margin_bottom = 8.02345
+rect_rotation = -270.0
+custom_styles/panel = SubResource( 3 )
+
+[node name="Outflow" parent="." instance=ExtResource( 2 )]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = -8.0
+margin_top = -8.66
+margin_right = 8.0
+margin_bottom = 7.34
+custom_styles/panel = SubResource( 4 )
+type = 1
+[connection signal="value_changed" from="SpinBox" to="." method="_on_SpinBox_value_changed"]

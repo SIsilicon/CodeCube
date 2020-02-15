@@ -1,5 +1,5 @@
 tool
-extends StaticBody
+extends Scriptable
 class_name Tile
 
 enum Type {
@@ -23,7 +23,39 @@ var tile_name : String
 var tile_description : String
 var is_wall := false
 
-func _ready():
+var initial_transform : Transform
+var linear_velocity := Vector3()
+
+func custom_execute(expression : String) -> bool:
+	if expression.begins_with("translate "):
+		var params := expression.split(" ")
+		var vector := Vector3(float(params[1]), 0.0, float(params[2]))
+		var time := float(params[3])
+		linear_velocity = vector / time
+		
+		$Tween.interpolate_property(self, "translation", translation, translation + vector, time, Tween.TRANS_LINEAR)
+		$Tween.start()
+		yield($Tween, "tween_completed")
+		translation.snapped(Vector3.ONE)
+		linear_velocity = Vector3.ZERO
+	else:
+		return false
+	
+	return true
+
+func execute() -> void:
+	initial_transform = transform
+	.execute()
+
+func reset() -> void:
+	.reset()
+	$Tween.remove_all()
+	transform = initial_transform
+
+func _ready() -> void:
+	initial_transform = transform
+	custom_insruction_set = funcref(self, "custom_execute")
+	
 	match type:
 		Type.Floor: tile = $"Tile-floor"
 		Type.Spikes: tile = $"Tile-spikes"
@@ -37,7 +69,7 @@ func _ready():
 	
 	if get_tree().edited_scene_root != self:
 		for child in get_children():
-			if child == tile:
+			if child in [tile, $Tween, $Sprite3D]:
 				continue
 			child.queue_free()
 		
@@ -72,6 +104,16 @@ func set_type(value : int) -> void:
 		Type.WallEdge: tile_name = "Wall Edge"
 		Type.WallPinch: tile_name = "Wall Pinch"
 
+func force_update() -> void:
+	_ready()
+	for i in get_children():
+		if i.is_queued_for_deletion():
+			i.free()
+
+func set_program(value : CCProgram) -> void:
+	.set_program(value)
+	$Sprite3D.visible = program != null
+
 func set_material_override(material : Material, node = self) -> void:
 	if node is MeshInstance:
 		node.material_override = material
@@ -80,4 +122,4 @@ func set_material_override(material : Material, node = self) -> void:
 		set_material_override(material, child)
 
 func set_colliding(value : bool) -> void:
-	collision_layer = int(value)
+	self.collision_layer = int(value)

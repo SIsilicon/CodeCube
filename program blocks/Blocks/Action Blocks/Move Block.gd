@@ -1,14 +1,18 @@
 extends ActionBlock
 
 func interpret() -> Array:
-	var code := ["move"]
+	var code := .interpret()
+	if not code.empty() and code[0] == "already visited":
+		return code
+	
+	code.append("move")
 	
 	if DEBUG_INTERPRET_STACK:
 		prints("move-block", self)
 	
 	var output_link := get_output_link()
 	if output_link != -1:
-		var next_block : ProgramBlock = link_handler.get_socket(output_link, true).block
+		var next_block : ProgramBlock = program.get_socket(output_link, true).block
 		code += next_block.interpret()
 	
 	return code

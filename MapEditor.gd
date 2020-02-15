@@ -12,12 +12,17 @@ var select_material := SpatialMaterial.new()
 
 var expanded := false
 
-var tile_to_add : Tile
+var tile_to_add : Spatial
 var painting := false
 var erasing := false
+var edited_points := []
+
 var wall_mode := false
 var walls := {}
-var edited_points := []
+
+var select_mode := false
+var select_highlight := MeshInstance.new()
+var selected_tile : Tile
 
 var undo_redo := UndoRedo.new()
 
@@ -36,34 +41,33 @@ func _ready():
 	select_material.params_grow = true
 	select_material.params_grow_amount = 0.04
 	
-	$Viewport.size = Vector2(1,1) * OS.window_size.x / 10.0
-	$Viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
-	yield(VisualServer, "frame_post_draw")
+	$Viewport.size = Vector2(128, 128)
+	$Viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
+	yield(get_tree(), "idle_frame")
+	add_button(preload("res://assets/Mouse_Icon.svg"), "Select", "Select tiles to change 'em up a bit.", -1)
 	for type in Tile.TYPE_COUNT:
 		var tile := preload("res://tiles/Tile.tscn").instance()
 		tile.type = type
 		
 		if not tile.is_wall || tile.type == Tile.Type.Wall:
 			$Viewport.add_child(tile)
-			yield(VisualServer, "frame_post_draw")
+			tile.force_update()
+			Global.render_viewport($Viewport)
 			$Viewport.remove_child(tile)
 			
 			var image : Image = viewport_tex.get_data()
 			var texture := ImageTexture.new()
 			texture.create_from_image(image, 0)
 			
-			var button := preload("res://MapFloorButton.tscn").instance()
-			button.icon = texture
-			button.text = tile.tile_name
-			button.hint_tooltip = tile.tile_description
-			button.group = button_group
-			button.connect("pressed", self, "_on_Tile_button_pressed", [tile.type])
-			$Scroll/VBox.add_child(button)
+			add_button(texture, tile.tile_name, tile.tile_description, tile.type)
 		
 		tile.queue_free()
-	$Viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
 	
 	_on_Tile_button_pressed(0)
+	
+	select_highlight.mesh = preload("res://assets/tile_selection.obj")
+	select_highlight.hide()
+	add_child(select_highlight)
 	
 	if DEBUG_WALLS and OS.is_debug_build():
 		debug_walls = ImmediateGeometry.new()
@@ -76,19 +80,9 @@ func _unhandled_input(event : InputEvent) -> void:
 	if not get_node("../ProgramWorkshop").expanded:
 		
 		if event is InputEventMouseMotion:
-			var viewport := get_viewport()
-			var mouse := viewport.get_mouse_position()
-			var ray := viewport.get_camera().project_ray_normal(mouse)
-			var origin := viewport.get_camera().project_ray_origin(mouse)
-			
-			var plane := Plane(Vector3.UP, 0)
-			var point := plane.intersects_ray(origin, ray)
-			if point and tile_to_add:
-				if wall_mode:
-					point = (point - HALF).snapped(Vector3(1,1,1)) + HALF
-				else:
-					point = point.snapped(Vector3(1,1,1))
-				
+			var point = get_tile_pos_over_mouse()
+			select_highlight.translation = point
+			if point and tile_to_add and not select_mode:
 				tile_to_add.translation = point
 			
 			if not edited_points.has(point) and (painting or erasing):
@@ -99,6 +93,7 @@ func _unhandled_input(event : InputEvent) -> void:
 						var new_tile := tile_to_add.duplicate()
 						new_tile.set_colliding(true)
 						new_tile.set_material_override(null)
+						new_tile.scale = Vector3(1, 1, 1)
 						new_tile.translation = point
 						if not _grid_map().tiles.has(point + Vector3.UP): # checking for wall
 							var other_tile = _grid_map().add_tile(new_tile, true)
@@ -126,6 +121,25 @@ func _unhandled_input(event : InputEvent) -> void:
 				edited_points.append(point)
 		
 		if event is InputEventMouseButton:
+			if select_mode:
+				if event.button_index != BUTTON_LEFT:
+					return
+				
+				if not event.pressed:
+					var point := get_tile_pos_over_mouse()
+					if _grid_map().tiles.has(point):
+						selected_tile = _grid_map().tiles[point]
+						
+						set_tile_to_add(selected_tile.duplicate())
+						tile_to_add.translation = selected_tile.translation
+						
+						$"../ProgramWorkshop".program = selected_tile.program
+						$"../ProgramWorkshop".show()
+					else:
+						tile_to_add.hide()
+						$"../ProgramWorkshop".hide()
+				return
+			
 			if event.button_index == BUTTON_LEFT:
 				painting = event.pressed
 			elif event.button_index == BUTTON_RIGHT:
@@ -149,7 +163,7 @@ func _input(event : InputEvent) -> void:
 		undo_redo.redo()
 		accept_event()
 
-func _process(delta : float) -> void:
+func _process(_delta : float) -> void:
 	if debug_walls:
 		debug_walls.clear()
 		debug_walls.begin(Mesh.PRIMITIVE_POINTS)
@@ -162,6 +176,7 @@ func place_wall(pos : Vector3, erase : bool, set_undo_redo := false) -> void:
 	
 	if not erase:
 		for i in range(0, 4):
+			# warning-ignore:integer_division
 			var tile_pos := Vector3(i % 2 - 1, 0.0, i / 2 - 1)
 			tile_pos += pos
 			if _grid_map().tiles.has(tile_pos):
@@ -235,6 +250,7 @@ func update_wall_data() -> void:
 			points[2] = tile.type in [Type.Wall, Type.WallEdge, Type.WallInvCorner]
 			points[3] = tile.type in [Type.Wall, Type.WallEdge, Type.WallCorner, Type.WallInvCorner, Type.WallPinch]
 			
+			# warning-ignore:unused_variable
 			for i in range(tile.rotation_degrees.y / 90):
 				var val = points.pop_back()
 				points.push_front(val)
@@ -247,11 +263,31 @@ func update_wall_data() -> void:
 func _grid_map() -> Node:
 	return get_node_or_null(grid_map)
 
-func _on_Tile_button_pressed(tile_type : int) -> void:
-	wall_mode = tile_type == Tile.Type.Wall
+func add_button(texture : Texture, name : String, description := "", type := -1) -> void:
+	var button := preload("res://MapFloorButton.tscn").instance()
+	button.icon = texture
+	button.text = name
+	button.hint_tooltip = description
+	button.group = button_group
+	button.connect("pressed", self, "_on_Tile_button_pressed", [type])
+	$Scroll/VBox.add_child(button)
+
+func get_tile_pos_over_mouse() -> Vector3:
+	var viewport := get_viewport()
+	var mouse := viewport.get_mouse_position()
+	var ray := viewport.get_camera().project_ray_normal(mouse)
+	var origin := viewport.get_camera().project_ray_origin(mouse)
 	
-	var tile := preload("res://tiles/Tile.tscn").instance()
-	tile.type = tile_type
+	var plane := Plane(Vector3.UP, 0)
+	var point := plane.intersects_ray(origin, ray)
+	if wall_mode:
+		point = (point - HALF).snapped(Vector3(1,1,1)) + HALF
+	else:
+		point = point.snapped(Vector3(1,1,1))
+	
+	return point
+
+func set_tile_to_add(tile : Tile) -> void:
 	tile.set_material_override(select_material)
 	tile.set_colliding(false)
 	add_child(tile)
@@ -260,9 +296,25 @@ func _on_Tile_button_pressed(tile_type : int) -> void:
 		tile_to_add.queue_free()
 		tile.translation = tile_to_add.translation
 	tile_to_add = tile
+	
+	if wall_mode:
+		tile_to_add.scale = Vector3(2, 1, 2)
 
-func _on_WallToggle_toggled(button_pressed : bool) -> void:
-	wall_mode = button_pressed
+func _on_Tile_button_pressed(tile_type : int) -> void:
+	wall_mode = tile_type == Tile.Type.Wall
+	select_mode = tile_type == -1
+	
+	if select_mode: # Selection Mode
+		select_highlight.show()
+		tile_to_add.hide()
+		return
+	else:
+		selected_tile = null
+		select_highlight.hide()
+	
+	var tile := preload("res://tiles/Tile.tscn").instance()
+	tile.type = tile_type
+	set_tile_to_add(tile)
 
 func _on_Drawer_toggled(button_pressed : bool) -> void:
 	if not button_pressed:
@@ -275,20 +327,25 @@ func _on_Drawer_toggled(button_pressed : bool) -> void:
 	$Tween.start()
 	expanded = button_pressed
 
-func _on_Program_Drawer_pressed():
+func _on_Program_Drawer_pressed() -> void:
 	if expanded:
 		$Drawer.pressed = false
 
-func _on_FileDialog_file_selected(path):
+func _on_FileDialog_file_selected(path) -> void:
 	if $FileDialog.mode == FileDialog.MODE_SAVE_FILE:
-		_grid_map().save_level(path)
+		_grid_map().save_level_json(path)
 	elif $FileDialog.mode == FileDialog.MODE_OPEN_FILE:
-		_grid_map().load_level(path)
+		_grid_map().load_level_json(path)
 		undo_redo.clear_history()
 		update_wall_data()
 		get_parent()._on_Reset_pressed()
+		
+		for tile in _grid_map().tiles.values():
+			if tile.program:
+				print(tile.name)
+				selected_tile = tile
 
-func _on_Save_pressed():
+func _on_Save_pressed() -> void:
 	if expanded:
 		if not _grid_map().spawn_tile:
 			get_parent().show_error_msg("This level doesn't have a spawn tile!")
@@ -298,12 +355,15 @@ func _on_Save_pressed():
 		$FileDialog.invalidate()
 		$FileDialog.popup_centered()
 
-func _on_Open_pressed():
+func _on_Open_pressed() -> void:
 	if expanded:
 		$FileDialog.mode = FileDialog.MODE_OPEN_FILE
 		$FileDialog.invalidate()
 		$FileDialog.popup_centered()
 
-func _on_visibility_changed():
+func _on_visibility_changed() -> void:
 	if tile_to_add:
 		tile_to_add.visible = visible
+
+func _on_Create_Program_pressed() -> void:
+	selected_tile.program = $"../ProgramWorkshop".program

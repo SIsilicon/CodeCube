@@ -1,0 +1,15 @@
+[remap]
+
+importer="bitmap"
+type="BitMap"
+path="res://.import/play_icon_mask.svg-f7acf71e1418620c2767fb66ce342605.res"
+
+[deps]
+
+source_file="res://assets/button_icons/Play Button/play_icon_mask.svg"
+dest_files=[ "res://.import/play_icon_mask.svg-f7acf71e1418620c2767fb66ce342605.res" ]
+
+[params]
+
+create_from=0
+threshold=0.5

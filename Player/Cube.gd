@@ -1,61 +1,43 @@
-extends Spatial
+extends Scriptable
 
 signal finished_moving
 signal died
 
 export var manual_control := false
 
-var moving := false setget set_moving
-var executing := false
-
-var linear_velocity := Vector3()
-var tile : Tile
-
-var face_state := 0 setget set_face_state
-
 onready var anim_player := $AnimationPlayer
 onready var tween := $Tween
 
-export var code := [
-	"move",
-	"move",
-	"turn left",
-	"jump",
-	"move"
-]
+var moving := false setget set_moving
 
+var linear_velocity := Vector3()
 var turn_direction : int
+var face_state := 0 setget set_face_state
+var tile : Tile
 
-func teleport(position) -> void:
-	tile = position
-	$FSM.go_to("teleport_end")
-
-func execute() -> void:
-	executing = true
-	
-	var line_num := 0
-	while executing:
-		var expression : String = code[line_num]
-		match expression:
-			"move":
-				$FSM.go_to("rolling")
-			"turn left":
-				turn_direction = 1
-				$FSM.go_to("turning")
-			"turn right":
-				turn_direction = -1
-				$FSM.go_to("turning")
-			"jump":
-				$FSM.go_to("jumping")
-			"stop":
-				break
-		
-		yield(self, "finished_moving")
-		line_num += 1
-	
-	executing = false
+func custom_execute(expression : String) -> bool:
+	match expression:
+		"move":
+			$FSM.go_to("rolling")
+			yield(self, "finished_moving")
+		"turn left":
+			turn_direction = 1
+			$FSM.go_to("turning")
+			yield(self, "finished_moving")
+		"turn right":
+			turn_direction = -1
+			$FSM.go_to("turning")
+			yield(self, "finished_moving")
+		"jump":
+			$FSM.go_to("jumping")
+			yield(self, "finished_moving")
+		_:
+			return false
+	return true
 
 func _ready() -> void:
+	custom_insruction_set = funcref(self, "custom_execute")
+	
 	$Cube/Glow.material_override = $Cube/Glow.material_override.duplicate()
 	translation = translation.round()
 	rotation.y = stepify(rotation.y, PI/2)
@@ -96,6 +78,11 @@ func hide_loading_icon() -> void:
 	$LoadingIcon.hide()
 	$LoadingIcon/AnimationPlayer.stop()
 
+func teleport(position) -> void:
+	tile = position
+	print(tile)
+	$FSM.go_to("teleport_end")
+
 func die() -> void:
 	var explosion : Spatial = preload("res://particle systems/Explode.tscn").instance()
 	explosion.translation = $Cube.global_transform.origin
@@ -119,7 +106,7 @@ func play_anim(anim : String) -> void:
 func floor_position() -> Vector3:
 	return translation * Vector3(1, 0, 1)
 
-func get_tile(position : Vector3) -> Tile:
+func get_tile() -> Tile:
 	if $FSM.active_state in ["jumping", "falling"]:
 		$FloorCast.translation = Vector3(0, 0.4, 0)
 	else:
@@ -145,7 +132,8 @@ func check_wall(dir : float) -> bool:
 	return false
 
 func check_tile() -> void:
-	var tile := get_tile(floor_position())
+	# warning-ignore:shadowed_variable
+	var tile := get_tile()
 	
 	if tile == null:
 		if $FSM.active_state != "jumping":

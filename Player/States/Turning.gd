@@ -3,6 +3,7 @@ extends State
 func on_enter(cube) -> void:
 	cube.moving = true
 	cube.play_anim("Cube-turn")
+	cube.linear_velocity = cube.get_tile().linear_velocity
 	
 	cube.tween.interpolate_callback(cube, 0.33, "check_tile")
 	cube.tween.start()

@@ -19,12 +19,13 @@ func _input(event : InputEvent) -> void:
 	if mouse_inside:
 		if event is InputEventMouseButton and event.button_index == BUTTON_LEFT and event.pressed:
 			var link_handler : Control = block.link_handler
+			var program = block.program
 			
 			if type == 1:
-				var link : Array = link_handler.get_socket_links(self)
+				var link : Array = program.get_socket_links(self)
 				if link.size() > 0:
-					var in_socket : Control = link_handler.get_socket(link[0], true)
-					link_handler.remove_link(link[0])
+					var in_socket : Control = program.get_socket(link[0], true)
+					program.remove_link(link[0])
 					
 					in_socket.mouse_inside = true
 					in_socket._input(event)
@@ -53,12 +54,12 @@ func _notification(what : int) -> void:
 		mouse_inside = false
 		get_stylebox("panel", "").bg_color = unselected_color
 
-func can_drop_data(position : Vector2, data) -> bool:
+func can_drop_data(_position : Vector2, data) -> bool:
 	return typeof(data) == TYPE_ARRAY and data.size() == 2 and \
 			data[0] is (get_script() as Script) and \
 			data[1] != bool(type)
 
-func drop_data(position : Vector2, data) -> void:
+func drop_data(_position : Vector2, _data) -> void:
 	block.link_handler.temp_socket_b = self
 
 func get_position() -> Vector2:

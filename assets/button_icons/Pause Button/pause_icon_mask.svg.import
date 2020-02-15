@@ -1,0 +1,15 @@
+[remap]
+
+importer="bitmap"
+type="BitMap"
+path="res://.import/pause_icon_mask.svg-c73757da9386759bf4c4e20492d001ed.res"
+
+[deps]
+
+source_file="res://assets/button_icons/Pause Button/pause_icon_mask.svg"
+dest_files=[ "res://.import/pause_icon_mask.svg-c73757da9386759bf4c4e20492d001ed.res" ]
+
+[params]
+
+create_from=0
+threshold=0.5
