@@ -1,18 +1,19 @@
-[gd_scene load_steps=20 format=2]
+[gd_scene load_steps=21 format=2]
 
 [ext_resource path="res://assets/cube/cube.glb" type="PackedScene" id=1]
 [ext_resource path="res://player/Cube.gd" type="Script" id=2]
 [ext_resource path="res://assets/cube/secondary-col.material" type="Material" id=3]
-[ext_resource path="res://player/States/Falling.gd" type="Script" id=4]
-[ext_resource path="res://player/States/Rolling.gd" type="Script" id=5]
-[ext_resource path="res://player/States/Turning.gd" type="Script" id=6]
+[ext_resource path="res://player/states/Rolling.gd" type="Script" id=4]
+[ext_resource path="res://player/states/Turning.gd" type="Script" id=5]
+[ext_resource path="res://player/states/Teleport Begin.gd" type="Script" id=6]
 [ext_resource path="res://assets/cube/primary-col.material" type="Material" id=7]
 [ext_resource path="res://addons/node_fsm_plugin/fsm_node.gd" type="Script" id=8]
-[ext_resource path="res://player/States/Idle.gd" type="Script" id=9]
-[ext_resource path="res://player/States/Jumping.gd" type="Script" id=10]
-[ext_resource path="res://player/States/Teleport End.gd" type="Script" id=11]
-[ext_resource path="res://player/States/Teleport Begin.gd" type="Script" id=12]
+[ext_resource path="res://player/states/Falling.gd" type="Script" id=9]
+[ext_resource path="res://player/states/Idle.gd" type="Script" id=10]
+[ext_resource path="res://player/states/Jumping.gd" type="Script" id=11]
+[ext_resource path="res://player/states/Teleport End.gd" type="Script" id=12]
 [ext_resource path="res://assets/interpreting.svg" type="Texture" id=13]
+[ext_resource path="res://assets/cube/cube_plop.wav" type="AudioStream" id=14]
 
 [sub_resource type="SpatialMaterial" id=1]
 flags_transparent = true
@@ -59,13 +60,12 @@ extents = Vector3( 0.488822, 0.518143, 0.506891 )
 
 [sub_resource type="Shader" id=4]
 code = "shader_type spatial;
-render_mode blend_mix, cull_disabled, depth_draw_alpha_prepass, unshaded;
+render_mode blend_mix, cull_disabled, unshaded;
 
 const float PI = 3.141592653;
 
 uniform sampler2D texture_albedo : hint_albedo;
 uniform float uv_rotation;
-uniform float alpha_scissor_threshold;
 
 // github.com/dmnsgn/glsl-rotate/blob/master/rotation-2d.glsl
 mat2 rotation2d(float angle) {
@@ -98,7 +98,6 @@ void fragment() {
 [sub_resource type="ShaderMaterial" id=5]
 shader = SubResource( 4 )
 shader_param/uv_rotation = 0.0
-shader_param/alpha_scissor_threshold = 0.58
 shader_param/texture_albedo = ExtResource( 13 )
 
 [sub_resource type="Animation" id=6]
@@ -155,12 +154,19 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0 )
 cast_to = Vector3( 0, 0, -1.5 )
 collision_mask = 3
 
-[node name="Blink" type="Timer" parent="." index="6"]
+[node name="Step" type="AudioStreamPlayer3D" parent="." index="6"]
+stream = ExtResource( 14 )
+unit_db = 5.0
+unit_size = 5.0
+bus = "Environment"
+doppler_tracking = 1
+
+[node name="Blink" type="Timer" parent="." index="7"]
 wait_time = 3.0
 one_shot = true
 autostart = true
 
-[node name="ColorRect" type="ColorRect" parent="." index="7"]
+[node name="ColorRect" type="ColorRect" parent="." index="8"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
@@ -169,38 +175,38 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Tween" type="Tween" parent="." index="8"]
+[node name="Tween" type="Tween" parent="." index="9"]
 
-[node name="FSM" type="Node" parent="." index="9"]
+[node name="FSM" type="Node" parent="." index="10"]
 script = ExtResource( 8 )
 initial_state = "idle"
 target = NodePath("..")
 
 [node name="Idle" type="Node" parent="FSM" index="0"]
-script = ExtResource( 9 )
+script = ExtResource( 10 )
 state_name = "idle"
 
 [node name="Rolling" type="Node" parent="FSM" index="1"]
-script = ExtResource( 5 )
+script = ExtResource( 4 )
 state_name = "rolling"
 
 [node name="Turning" type="Node" parent="FSM" index="2"]
-script = ExtResource( 6 )
+script = ExtResource( 5 )
 state_name = "turning"
 
 [node name="Falling" type="Node" parent="FSM" index="3"]
-script = ExtResource( 4 )
+script = ExtResource( 9 )
 state_name = "falling"
 
 [node name="Jumping" type="Node" parent="FSM" index="4"]
-script = ExtResource( 10 )
+script = ExtResource( 11 )
 state_name = "jumping"
 
 [node name="Teleport End" type="Node" parent="FSM" index="5"]
-script = ExtResource( 11 )
+script = ExtResource( 12 )
 state_name = "teleport_end"
 
 [node name="Teleport Begin" type="Node" parent="FSM" index="6"]
-script = ExtResource( 12 )
+script = ExtResource( 6 )
 state_name = "teleport_begin"
 [connection signal="timeout" from="Blink" to="." method="_on_Blink_timeout"]

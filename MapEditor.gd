@@ -1,11 +1,11 @@
-extends Panel
+extends Control
 
 const HALF = Vector3(0.5, 0.0, 0.5)
 const DEBUG_WALLS = false
 
 export(NodePath) var grid_map
 
-onready var viewport_tex : ViewportTexture = $Viewport.get_texture()
+onready var viewport_tex : ViewportTexture = $TileSelect/Viewport.get_texture()
 
 var button_group := ButtonGroup.new()
 var select_material := SpatialMaterial.new()
@@ -28,12 +28,12 @@ var undo_redo := UndoRedo.new()
 
 var debug_walls : ImmediateGeometry
 
-func _ready():
+func _ready() -> void:
 	if not get_parent().sandbox_mode:
 		return
 	
 	if not expanded:
-		rect_position.x += rect_size.x
+		$TileSelect.rect_position.x += $TileSelect.rect_size.x
 	
 	select_material.flags_transparent = true
 	select_material.flags_unshaded = true
@@ -41,8 +41,8 @@ func _ready():
 	select_material.params_grow = true
 	select_material.params_grow_amount = 0.04
 	
-	$Viewport.size = Vector2(128, 128)
-	$Viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
+	$TileSelect/Viewport.size = Vector2(128, 128)
+	$TileSelect/Viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
 	yield(get_tree(), "idle_frame")
 	add_button(preload("res://assets/Mouse_Icon.svg"), "Select", "Select tiles to change 'em up a bit.", -1)
 	for type in Tile.TYPE_COUNT:
@@ -50,10 +50,10 @@ func _ready():
 		tile.type = type
 		
 		if not tile.is_wall || tile.type == Tile.Type.Wall:
-			$Viewport.add_child(tile)
+			$TileSelect/Viewport.add_child(tile)
 			tile.force_update()
-			Global.render_viewport($Viewport)
-			$Viewport.remove_child(tile)
+			Global.render_viewport($TileSelect/Viewport)
+			$TileSelect/Viewport.remove_child(tile)
 			
 			var image : Image = viewport_tex.get_data()
 			var texture := ImageTexture.new()
@@ -78,7 +78,6 @@ func _ready():
 
 func _unhandled_input(event : InputEvent) -> void:
 	if not get_node("../ProgramWorkshop").expanded:
-		
 		if event is InputEventMouseMotion:
 			var point = get_tile_pos_over_mouse()
 			select_highlight.translation = point
@@ -103,7 +102,6 @@ func _unhandled_input(event : InputEvent) -> void:
 								undo_redo.add_undo_method(_grid_map(), "add_tile", other_tile, true)
 							else:
 								undo_redo.add_undo_method(_grid_map(), "remove_tile", new_tile, false)
-							
 					
 					get_tree().set_input_as_handled()
 				elif erasing:
@@ -115,7 +113,7 @@ func _unhandled_input(event : InputEvent) -> void:
 						_grid_map().remove_tile(other_tile, false)
 						undo_redo.add_do_method(_grid_map(), "remove_tile", other_tile, false)
 						undo_redo.add_undo_method(_grid_map(), "add_tile", other_tile, true)
-					
+						
 					get_tree().set_input_as_handled()
 				
 				edited_points.append(point)
@@ -158,10 +156,10 @@ func _unhandled_input(event : InputEvent) -> void:
 func _input(event : InputEvent) -> void:
 	if event.is_action_pressed("undo"):
 		undo_redo.undo()
-		accept_event()
+		get_tree().set_input_as_handled()
 	elif event.is_action_pressed("redo"):
 		undo_redo.redo()
-		accept_event()
+		get_tree().set_input_as_handled()
 
 func _process(_delta : float) -> void:
 	if debug_walls:
@@ -270,7 +268,7 @@ func add_button(texture : Texture, name : String, description := "", type := -1)
 	button.hint_tooltip = description
 	button.group = button_group
 	button.connect("pressed", self, "_on_Tile_button_pressed", [type])
-	$Scroll/VBox.add_child(button)
+	$TileSelect/Scroll/VBox.add_child(button)
 
 func get_tile_pos_over_mouse() -> Vector3:
 	var viewport := get_viewport()
@@ -317,24 +315,27 @@ func _on_Tile_button_pressed(tile_type : int) -> void:
 	set_tile_to_add(tile)
 
 func _on_Drawer_toggled(button_pressed : bool) -> void:
+	var tile_select_pos : Vector2 = $TileSelect.rect_position
+	var tile_select_size_x : float = $TileSelect.rect_size.x
+	
 	if not button_pressed:
-		$Tween.interpolate_property(self, "rect_position", rect_position, rect_position + \
-				Vector2(rect_size.x, 0), 0.3, Tween.TRANS_QUAD, Tween.EASE_OUT)
+		$Tween.interpolate_property($TileSelect, "rect_position", tile_select_pos, tile_select_pos + \
+				Vector2(tile_select_size_x, 0), 0.3, Tween.TRANS_QUAD, Tween.EASE_OUT)
 	else:
-		$Tween.interpolate_property(self, "rect_position", rect_position, rect_position - \
-				Vector2(rect_size.x, 0), 0.3, Tween.TRANS_QUAD, Tween.EASE_OUT)
+		$Tween.interpolate_property($TileSelect, "rect_position", tile_select_pos, tile_select_pos - \
+				Vector2(tile_select_size_x, 0), 0.3, Tween.TRANS_QUAD, Tween.EASE_OUT)
 	
 	$Tween.start()
 	expanded = button_pressed
 
 func _on_Program_Drawer_pressed() -> void:
 	if expanded:
-		$Drawer.pressed = false
+		$TileSelect/Drawer.pressed = false
 
 func _on_FileDialog_file_selected(path) -> void:
-	if $FileDialog.mode == FileDialog.MODE_SAVE_FILE:
+	if $SaveDialog.mode == FileDialog.MODE_SAVE_FILE:
 		_grid_map().save_level_json(path)
-	elif $FileDialog.mode == FileDialog.MODE_OPEN_FILE:
+	elif $SaveDialog.mode == FileDialog.MODE_OPEN_FILE:
 		_grid_map().load_level_json(path)
 		undo_redo.clear_history()
 		update_wall_data()
@@ -345,25 +346,30 @@ func _on_FileDialog_file_selected(path) -> void:
 				print(tile.name)
 				selected_tile = tile
 
-func _on_Save_pressed() -> void:
-	if expanded:
-		if not _grid_map().spawn_tile:
-			get_parent().show_error_msg("This level doesn't have a spawn tile!")
-			return
-		
-		$FileDialog.mode = FileDialog.MODE_SAVE_FILE
-		$FileDialog.invalidate()
-		$FileDialog.popup_centered()
-
-func _on_Open_pressed() -> void:
-	if expanded:
-		$FileDialog.mode = FileDialog.MODE_OPEN_FILE
-		$FileDialog.invalidate()
-		$FileDialog.popup_centered()
-
-func _on_visibility_changed() -> void:
-	if tile_to_add:
-		tile_to_add.visible = visible
+func _on_Save_pressed(save_button : String) -> void:
+	if not _grid_map().spawn_tile:
+		get_parent().show_error_msg("This level doesn't have a spawn tile!")
+		return
+	if not _grid_map().goal_tile:
+		get_parent().show_error_msg("This level doesn't have a goal tile!")
+		return
+	
+	if save_button == "save":
+		$SaveDialog.popup_centered()
+	elif save_button == "confirm":
+		var file_name = $SaveDialog/Control/Name.text
+		if file_name.is_valid_filename():
+			_grid_map().description = $SaveDialog/Control/Description.text
+			_grid_map().save_level_json("user://levels/"+file_name+".cclevel")
+			$SaveDialog.hide()
+		else:
+			get_parent().show_error_msg("Improper Level Name!")
+	elif save_button == "cancel":
+		$SaveDialog.hide()
 
 func _on_Create_Program_pressed() -> void:
 	selected_tile.program = $"../ProgramWorkshop".program
+
+func _on_TileSelect_visibility_changed():
+	if tile_to_add:
+		tile_to_add.visible = visible

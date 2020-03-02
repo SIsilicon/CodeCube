@@ -9,8 +9,6 @@ params_cull_mode = 2
 params_billboard_mode = 2
 params_billboard_keep_scale = true
 albedo_color = Color( 0.623529, 1, 0.54902, 1 )
-proximity_fade_enable = true
-proximity_fade_distance = 1.0
 
 [sub_resource type="QuadMesh" id=2]
 material = SubResource( 1 )

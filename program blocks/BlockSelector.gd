@@ -1,8 +1,5 @@
 extends ScrollContainer
 
-export var button_theme : Theme
-
-var button_group : ButtonGroup
 var blocks := {}
 
 func update_list(block_paths : Array) -> void:
@@ -15,16 +12,12 @@ func update_list(block_paths : Array) -> void:
 		
 		var inst := block.instance()
 		
-		var button := Button.new()
+		var button := $Template.duplicate()
 		button.icon = inst.icon
-		button.group = button_group
 		button.text = file.get_file()
-		button.focus_mode = Control.FOCUS_NONE
-		button.enabled_focus_mode = Control.FOCUS_NONE
-		button.theme = button_theme
-		button.rect_min_size.y = 40
 		$Margin/VBox.add_child(button)
 		button.connect("button_down", self, "_element_pressed", [button])
+		button.show()
 		
 		inst.queue_free()
 

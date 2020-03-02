@@ -45,10 +45,10 @@ func _input(event : InputEvent) -> void:
 	if expanded:
 		if event.is_action_pressed("undo"):
 			undo_redo.undo()
-			accept_event()
+			get_tree().set_input_as_handled()
 		elif event.is_action_pressed("redo"):
 			undo_redo.redo()
-			accept_event()
+			get_tree().set_input_as_handled()
 
 func _process(delta : float) -> void:
 	var new_scale : Vector2 = $LinkHandler.rect_scale.linear_interpolate(Vector2(1, 1) * zoom, delta * 10.0)
@@ -83,7 +83,7 @@ func set_program(value : CCProgram) -> void:
 		$ScrollContainer.update_list(program.available_blocks)
 		$GetProgram.hide()
 		
-		if not $"..".sandbox_mode:
+		if not $"..".sandbox_mode or $"../Controls/Test".pressed:
 			$"..".cube_program = program
 			$"..".cube.program = program
 		else:

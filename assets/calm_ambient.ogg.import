@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/calm_ambient.ogg-69936fdb80b5dcb9527838c43d5f5b14.oggstr"
+
+[deps]
+
+source_file="res://assets/calm_ambient.ogg"
+dest_files=[ "res://.import/calm_ambient.ogg-69936fdb80b5dcb9527838c43d5f5b14.oggstr" ]
+
+[params]
+
+loop=true
+loop_offset=0

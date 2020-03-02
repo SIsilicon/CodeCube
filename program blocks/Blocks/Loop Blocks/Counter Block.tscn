@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://program blocks/Blocks/Loop Blocks/Counter Block.gd" type="Script" id=1]
 [ext_resource path="res://program blocks/Socket.tscn" type="PackedScene" id=2]
+[ext_resource path="res://program blocks/Blocks/Loop Blocks/Counter Block.svg" type="Texture" id=3]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.756863, 0.823529, 0.176471, 0.65098 )
@@ -50,25 +51,25 @@ corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
 
 [node name="CounterBlock" type="Panel"]
-margin_left = -146.193
-margin_top = -36.3699
-margin_right = 154.807
-margin_bottom = 38.6301
+margin_left = -177.308
+margin_top = -37.3705
+margin_right = 176.692
+margin_bottom = 37.6295
 custom_styles/panel = SubResource( 1 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+icon = ExtResource( 3 )
 
 [node name="Label" type="Label" parent="."]
-anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -109.85
-margin_top = -11.0
-margin_right = -29.8496
-margin_bottom = -7.0
+margin_left = 10.5045
+margin_top = -10.5
+margin_right = -41.9955
+margin_bottom = 14.5
 text = "Counter"
 align = 1
 valign = 1
@@ -77,14 +78,14 @@ __meta__ = {
 }
 
 [node name="SpinBox" type="SpinBox" parent="."]
-anchor_left = 0.5
+anchor_left = 0.398
 anchor_top = 0.5
-anchor_right = 0.5
+anchor_right = 1.0
 anchor_bottom = 0.5
-margin_left = -19.9995
-margin_top = -21.8843
-margin_right = 128.0
-margin_bottom = 20.1157
+margin_left = -0.140121
+margin_top = -19.7098
+margin_right = -32.4821
+margin_bottom = 22.2902
 min_value = 1.0
 value = 1.0
 __meta__ = {
@@ -102,10 +103,8 @@ rect_rotation = -180.0
 custom_styles/panel = SubResource( 2 )
 
 [node name="LoopBack" parent="." instance=ExtResource( 2 )]
-anchor_left = 0.009
-anchor_top = 0.501
-anchor_right = 0.009
-anchor_bottom = 0.501
+anchor_left = 0.0
+anchor_right = 0.0
 margin_left = -8.01628
 margin_top = -7.97655
 margin_right = 7.98371

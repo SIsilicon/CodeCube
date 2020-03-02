@@ -39,8 +39,8 @@ corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
 
 [node name="TranslateBlock" type="Panel"]
-margin_left = 0.831787
-margin_right = 428.832
+margin_left = 1.0
+margin_right = 609.0
 margin_bottom = 106.0
 custom_styles/panel = SubResource( 1 )
 script = ExtResource( 1 )
@@ -68,13 +68,15 @@ margin_left = 9.68646
 margin_top = 0.0149994
 margin_right = -6.31354
 margin_bottom = -15.0
+alignment = 1
 __meta__ = {
 "_edit_group_": true,
 "_edit_use_anchors_": false
 }
 
 [node name="SpinBoxX" type="SpinBox" parent="Parameters"]
-margin_right = 132.0
+margin_left = 9.0
+margin_right = 195.0
 margin_bottom = 42.0
 mouse_filter = 2
 mouse_default_cursor_shape = 1
@@ -84,8 +86,8 @@ align = 1
 suffix = "units right"
 
 [node name="SpinBoxY" type="SpinBox" parent="Parameters"]
-margin_left = 140.0
-margin_right = 272.0
+margin_left = 203.0
+margin_right = 389.0
 margin_bottom = 42.0
 mouse_filter = 2
 mouse_default_cursor_shape = 1
@@ -98,8 +100,8 @@ __meta__ = {
 }
 
 [node name="SpinBoxT" type="SpinBox" parent="Parameters"]
-margin_left = 280.0
-margin_right = 412.0
+margin_left = 397.0
+margin_right = 583.0
 margin_bottom = 42.0
 mouse_filter = 2
 mouse_default_cursor_shape = 1

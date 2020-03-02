@@ -39,8 +39,8 @@ corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
 
 [node name="JumpBlock" type="Panel"]
-margin_right = 120.0
-margin_bottom = 54.66
+margin_right = 144.0
+margin_bottom = 55.0
 rect_min_size = Vector2( 120, 20 )
 custom_styles/panel = SubResource( 1 )
 script = ExtResource( 1 )

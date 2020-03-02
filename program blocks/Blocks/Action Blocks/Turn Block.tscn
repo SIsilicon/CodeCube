@@ -39,10 +39,13 @@ corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
 
 [node name="TurnBlock" type="Panel"]
-margin_right = 160.0
+margin_right = 186.0
 margin_bottom = 110.0
 custom_styles/panel = SubResource( 1 )
 script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 icon = ExtResource( 3 )
 
 [node name="Label" type="Label" parent="."]

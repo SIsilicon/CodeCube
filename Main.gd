@@ -20,18 +20,28 @@ var show_controls := true
 var current_instruction : Label
 
 func _ready() -> void:
+	$DirectionalLight.shadow_enabled = Global.shadows_enabled
+	if not Global.particles_enabled:
+		$Camera/CPUParticles.queue_free()
+	
 	$ProgramWorkshop.visible = not sandbox_mode
 	
-	spawn_cube()
 	if not sandbox_mode:
+		spawn_cube()
 		$ProgramWorkshop.program = cube_program
 		$MapEditor.queue_free()
 		$GridMap.start_tile_codes()
+		
+		$Controls/Test.queue_free()
+	else:
+		$MapEditor/SaveDialog/Control/Name.text = $GridMap.save_file.get_basename()
+		$MapEditor/SaveDialog/Control/Description.text = $GridMap.description
+		$Controls/Play.hide()
 
 func _process(_delta : float) -> void:
 	$CameraFollow.enable_drag = sandbox_mode or not ($Controls/Pause.visible and $Controls/Reset.visible)
-	if not cube_exists() and manual_control:
-		spawn_cube()
+#	if not cube_exists() and manual_control:
+#		spawn_cube()
 	
 	Engine.time_scale = max(running_speed, 0.01)
 
@@ -40,7 +50,7 @@ func spawn_cube() -> void:
 		show_error_msg("Can't place QBoy! There's no spawn tile!")
 		return
 	
-	cube = preload("res://Player/Cube.tscn").instance()
+	cube = preload("res://player/Cube.tscn").instance()
 	add_child_below_node($GridMap, cube)
 	cube.program = cube_program
 	cube.manual_control = manual_control
@@ -48,6 +58,8 @@ func spawn_cube() -> void:
 	cube.connect("died", self, "_on_Cube_died")
 	cube.connect("read_instruction", self, "_on_instruction_read")
 	cube_died = false
+	
+	$CameraFollow.refocus()
 
 func show_error_msg(msg : String) -> void:
 	$Error.text = msg
@@ -62,6 +74,8 @@ func show_error_msg(msg : String) -> void:
 	$Tween.interpolate_property($Error, "margin_top", $Error.margin_top, 0, 0.3, Tween.TRANS_LINEAR, Tween.EASE_IN, 3.0)
 	$Tween.interpolate_property($Error, "margin_bottom", 0, $Error.margin_bottom, 0.3, Tween.TRANS_LINEAR, Tween.EASE_IN, 3.0)
 	$Tween.start()
+	
+	$Error/Sound.play()
 
 func _on_Cube_died() -> void:
 	cube_died = true
@@ -69,16 +83,6 @@ func _on_Cube_died() -> void:
 
 func _on_Play_pressed() -> void:
 	if not interpreting and not playing:
-		if sandbox_mode:
-			$GridMap.start_tile_codes()
-			
-			$Controls/Play.hide()
-			$Controls/Pause.show()
-			$Controls/Reset.show()
-			$MapEditor.hide()
-			playing = true
-			return
-		
 		interpreting = true
 		cube.show_loading_icon()
 		
@@ -113,24 +117,52 @@ func _on_Pause_pressed() -> void:
 func _on_Reset_pressed() -> void:
 	get_tree().paused = false
 	
-	if sandbox_mode:
-		for tile in $GridMap.tiles.values():
-			if tile.program:
-				tile.reset()
-		$MapEditor.show()
+	if cube_exists():
+		cube.executing = false
+		cube.teleport($GridMap.spawn_tile)
 	else:
-		if cube_exists():
-			cube.executing = false
-			cube.teleport($GridMap.spawn_tile)
-		else:
-			spawn_cube()
-		drag_offset = Vector2()
-		load_instructions([])
+		spawn_cube()
+	drag_offset = Vector2()
+	load_instructions([])
+	
+	$GridMap.start_tile_codes()
 	
 	playing = false
 	$Controls/Reset.hide()
 	$Controls/Pause.hide()
 	$Controls/Play.show()
+
+func _on_Test_pressed() -> void:
+	if $Controls/Test.pressed:
+		_on_Reset_pressed()
+		$ProgramWorkshop.program = cube_program
+		$MapEditor.hide()
+		$ProgramWorkshop.show()
+	else:
+		for tile in $GridMap.tiles.values():
+			if tile.program:
+				tile.reset()
+		$MapEditor.show()
+		$ProgramWorkshop.hide()
+		if cube_exists():
+			cube.queue_free()
+		$Controls/Play.hide()
+		
+	$Tween.interpolate_property($Controls/Test, "rect_scale", Vector2(0.7, 0.7), Vector2.ONE, 0.2, Tween.TRANS_CUBIC, Tween.EASE_OUT)
+	$Tween.start()
+
+func _on_Quit_pressed(should_quit : bool) -> void:
+	if $QuitDialog.visible:
+		if should_quit:
+			var loading_screen = preload("res://loading screen/LoadingScreen.tscn").instance()
+			loading_screen.initial_load = false
+			loading_screen.scene_to_load = "res://main menu/Menu.tscn"
+			loading_screen.connect("scene_loaded", self, "_on_menu_loaded")
+			get_tree().root.add_child(loading_screen)
+		else:
+			$QuitDialog.hide()
+	else:
+		$QuitDialog.popup_centered()
 
 func _on_Drawer_pressed() -> void:
 	if show_controls:
@@ -168,3 +200,6 @@ func load_instructions(code : Array) -> void:
 		vbox.add_child(label)
 	
 	current_instruction = null
+
+func _on_menu_loaded(_scene : Node) -> void:
+	queue_free()

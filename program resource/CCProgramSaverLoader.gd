@@ -12,7 +12,7 @@ func save(path : String, program : CCProgram) -> int:
 	if file.get_error():
 		return file.get_error()
 	
-	var err = file.store_line(save_as_json(program))
+	file.store_line(save_as_json(program))
 	file.close()
 	return OK
 

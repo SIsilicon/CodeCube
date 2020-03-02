@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://assets/fonts/AndersonGrotesk-Ultrabold.otf" type="DynamicFontData" id=1]
+[ext_resource path="res://assets/fonts/fff-forward.regular.ttf" type="DynamicFontData" id=1]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.933333, 0.933333, 0.933333, 0.498039 )
@@ -12,7 +12,7 @@ bg_color = Color( 0.168627, 0.168627, 0.168627, 0.498039 )
 bg_color = Color( 0.5, 0.5, 0.5, 0.498039 )
 
 [sub_resource type="DynamicFont" id=4]
-size = 30
+size = 20
 outline_size = 1
 outline_color = Color( 0.352941, 0.352941, 0.352941, 0.435294 )
 use_filter = true

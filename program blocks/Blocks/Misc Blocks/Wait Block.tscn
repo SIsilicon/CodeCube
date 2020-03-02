@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://program blocks/Blocks/Misc Blocks/Wait Block.gd" type="Script" id=1]
 [ext_resource path="res://program blocks/Socket.tscn" type="PackedScene" id=2]
+[ext_resource path="res://program blocks/Blocks/Misc Blocks/Wait Block.svg" type="Texture" id=3]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.4, 0.611765, 0.254902, 0.65098 )
@@ -38,7 +39,7 @@ corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
 
 [node name="WaitBlock" type="Panel"]
-margin_right = 192.0
+margin_right = 218.0
 margin_bottom = 92.0
 rect_min_size = Vector2( 150, 50 )
 focus_mode = 1
@@ -47,6 +48,7 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+icon = ExtResource( 3 )
 
 [node name="Label" type="Label" parent="."]
 anchor_top = 0.5

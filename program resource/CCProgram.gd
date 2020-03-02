@@ -33,6 +33,7 @@ var code := [] setget , get_code
 var code_dirty := true setget set_code_dirty
 var error := 0
 
+# warning-ignore:shadowed_variable
 func _init(type := 0) -> void:
 	self.type = type
 	available_blocks = BUILTIN_BLOCKS + get_specific_blocks()
@@ -64,6 +65,7 @@ func interpret() -> int:
 		error = 0
 		return error
 	
+	# warning-ignore:unreachable_code
 	error = 4
 	return error
 
@@ -199,6 +201,7 @@ func get_specific_blocks() -> Array:
 			"res://program blocks/Blocks/Tile Blocks/Translate Block",
 		]
 
+# warning-ignore:shadowed_variable
 static func get_error_msg(error : int) -> String:
 	match error:
 		0: return "It's all good."

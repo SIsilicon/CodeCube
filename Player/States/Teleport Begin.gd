@@ -1,6 +1,8 @@
 extends State
 
 func on_enter(cube) -> void:
+	$"../../Step".play()
+	
 	cube.play_anim("Cube-teleport")
 	cube.linear_velocity = Vector3()
 	cube.moving = true

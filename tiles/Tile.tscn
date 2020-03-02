@@ -105,8 +105,8 @@ shape = SubResource( 1 )
 
 [node name="OmniLight" type="OmniLight" parent="Tile-goal" index="2"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.126842, 0 )
-light_color = Color( 0.662745, 1, 0.552941, 1 )
-light_energy = 2.5
+light_color = Color( 0.286275, 0.886275, 0.0901961, 1 )
+light_energy = 0.62
 light_specular = 0.0
 shadow_enabled = true
 omni_attenuation = 2.14355
@@ -140,5 +140,6 @@ shape = SubResource( 1 )
 [node name="Sprite3D" type="Sprite3D" parent="." index="10"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.620066, 0 )
 visible = false
+pixel_size = 0.005
 billboard = 1
 texture = ExtResource( 6 )

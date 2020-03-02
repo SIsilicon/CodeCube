@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://program blocks/Blocks/Loop Blocks/Infinite Block.gd" type="Script" id=1]
 [ext_resource path="res://program blocks/Socket.tscn" type="PackedScene" id=2]
+[ext_resource path="res://program blocks/Blocks/Loop Blocks/Infinite Block.svg" type="Texture" id=3]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.756863, 0.823529, 0.176471, 0.65098 )
@@ -57,16 +58,16 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+icon = ExtResource( 3 )
 
 [node name="Label" type="Label" parent="."]
-anchor_left = 0.5
 anchor_top = 0.5
-anchor_right = 0.5
+anchor_right = 0.973
 anchor_bottom = 0.5
-margin_left = -46.0
+margin_left = 1.0
 margin_top = -11.0
-margin_right = 46.0
-margin_bottom = 11.0
+margin_right = -1.76401
+margin_bottom = 14.0
 text = "Loop Forever"
 align = 1
 valign = 1
